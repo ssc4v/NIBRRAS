@@ -1,0 +1,230 @@
+Enhance the Learning module by adding a Knowledge Relationship Map.
+
+Important:
+- Keep mock data only.
+- No real API calls.
+- No external services.
+- No paid services.
+- Arabic RTL.
+- Black-and-white monochrome theme.
+- Mobile-first.
+- Strict Front-end / Back-end separation.
+- UI must call learningService only.
+
+Goal:
+NIBRRAS must have two connected learning views:
+
+1. خريطة التعلم
+A hierarchical learning tree:
+Domain → Area → Branch → Sub-Branch → Lesson → Questions → Reviews
+
+2. خريطة العلاقات
+A graph/network map showing relationships between every saved knowledge item.
+
+Difference:
+خريطة التعلم = ترتيب هرمي للتعلم.
+خريطة العلاقات = شبكة تربط المعلومات ببعض حتى لو كانت في مجالات مختلفة.
+
+Add inside Learning tab a new internal section:
+"خريطة العلاقات"
+
+Now Learning tab internal sections should be:
+1. خريطة التعلم
+2. خريطة العلاقات
+3. بنك الأسئلة
+4. مولّد الأسئلة
+5. ملفات التعلم
+
+Relationship Map requirements:
+Show knowledge nodes as cards or graph nodes.
+
+Each node represents:
+- مجال
+- معرفة
+- فرع
+- درس
+- مفهوم
+- سؤال
+- ملف تعلم
+- ملاحظة
+- مصدر
+- مهارة
+
+Each relationship edge has a type:
+- يعتمد على
+- متطلب سابق
+- يشرح
+- مثال على
+- يشبه
+- يعارض
+- يسبب لبس مع
+- يُستخدم في
+- جزء من
+- نتيجة لـ
+- مرتبط بـ
+- يختبر
+- مأخوذ من ملف
+- مولّد من فيديو
+- يحتاج مراجعة بسبب
+
+Each relationship should show:
+- source node
+- target node
+- relationship type
+- strength: ضعيف / متوسط / قوي
+- confidence score
+- reason
+- created by: user / mock AI / system
+- date
+
+Front-end UI:
+Create a relationship map screen with:
+- Search node
+- Filter by domain
+- Filter by relationship type
+- Filter by weak topics
+- Graph/list toggle:
+  - عرض شبكي
+  - عرض قائمة
+- Node detail panel
+- Related nodes panel
+- Add relationship button
+- Edit relationship button
+- Remove relationship mock button
+- Highlight missing prerequisites button
+
+Node detail panel:
+When user taps a node, show:
+- title
+- type
+- mastery percentage
+- linked questions
+- linked files
+- prerequisites
+- child topics
+- related concepts
+- confusing concepts
+- next recommended learning step
+
+Examples to include in mock data:
+
+Artificial Intelligence
+- depends on Machine Learning
+- depends on Statistics
+- depends on Programming
+- depends on Data
+
+Machine Learning
+- depends on Data
+- depends on Statistics
+- depends on Linear Algebra
+- uses Python
+
+API
+- depends on HTTP
+- uses JSON
+- related to Webhook
+- used in n8n
+- confusing with Webhook
+
+Cybersecurity
+- combines Networking
+- combines Programming
+- combines Operating Systems
+- combines Web
+- uses Cryptography
+
+n8n
+- uses Workflows
+- uses Webhooks
+- uses APIs
+- uses JSON
+- connects to Agents
+
+Question integration:
+Every question must be connected to:
+- the concept it tests
+- the lesson it belongs to
+- the weakness it helps fix
+- the review schedule
+
+Learning files integration:
+Every learning file must be connected to:
+- the knowledge node it belongs to
+- concepts extracted from it
+- generated questions
+- source type:
+  - text
+  - image
+  - video
+  - YouTube
+  - article
+  - PDF placeholder
+  - manual note
+
+YouTube mock relation:
+If a user adds a YouTube link in mock mode, create:
+YouTube file node
+→ extracted topics
+→ generated questions
+→ linked lessons
+→ review queue
+
+Back-end mock service:
+Update learningService.ts with mock-only functions:
+
+- getLearningTree()
+- getKnowledgeRelationshipGraph()
+- getNodeRelationships(nodeId)
+- getRelatedNodes(nodeId)
+- createKnowledgeRelationship(data)
+- updateKnowledgeRelationship(edgeId, updates)
+- removeKnowledgeRelationshipMock(edgeId)
+- findMissingPrerequisites(nodeId)
+- getConfusingConcepts(nodeId)
+- linkQuestionToConcept(questionId, conceptId)
+- linkFileToConcept(fileId, conceptId)
+- generateRelationshipsFromYouTubeMock(url)
+- generateRelationshipsFromTextMock(text)
+- getRecommendedNextNode(userId, currentNodeId)
+
+Types:
+Add or update:
+
+- KnowledgeNode
+- KnowledgeNodeType
+- KnowledgeEdge
+- KnowledgeRelationshipType
+- RelationshipStrength
+- RelationshipConfidence
+- KnowledgeGraph
+- LearningTree
+- LearningFileNode
+- QuestionNode
+- ConceptNode
+
+Design rules:
+- Do not make the graph crowded.
+- On mobile, default to a clean list/tree view.
+- Add graph view as optional.
+- Use collapsible groups.
+- Use simple line indicators for relationships.
+- Keep black-and-white.
+- No blue buttons.
+- Primary buttons must be white with black text.
+- Secondary buttons must be black with gray border.
+- Use only tiny status colors if necessary.
+
+Acceptance test:
+The feature is successful only if:
+1. Learning tab has both خريطة التعلم and خريطة العلاقات.
+2. خريطة التعلم shows hierarchy.
+3. خريطة العلاقات shows cross-topic relationships.
+4. A knowledge node can have many relationship types.
+5. Questions are linked to concepts.
+6. Files are linked to concepts.
+7. YouTube mock content creates relationships in mock mode.
+8. User can add/edit/remove relationships in mock mode.
+9. UI remains clean on iPhone.
+10. No real API calls exist.
+11. Front-end calls learningService only.

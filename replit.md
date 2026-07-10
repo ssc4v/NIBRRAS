@@ -1,6 +1,6 @@
-# [Project name]
+# NIBRRAS / نِبراس
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+A private, single-user Arabic-first personal AI control console: a chat home plus adaptive learning, deep search, and an n8n-style control center — Phase 1 is fully mocked, no real backend.
 
 ## Run & Operate
 

@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "نِبراس"
+version = "1.0.0"
+id = "artifacts/nibrras"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22127
+
+[services.development]
+run = "pnpm --filter @workspace/nibrras run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/nibrras", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/nibrras/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22127"
+BASE_PATH = "/"

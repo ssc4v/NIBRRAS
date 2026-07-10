@@ -1,0 +1,275 @@
+Enhance the Learning tab before continuing.
+
+Add a full Knowledge & Question Builder module inside the Learning tab.
+
+Important:
+- Keep mock data only.
+- No real YouTube calls.
+- No real AI calls.
+- No external APIs.
+- No paid services.
+- Keep Arabic RTL.
+- Keep black-and-white monochrome theme.
+- Keep mobile-first.
+- Keep strict Front-end / Back-end separation.
+
+Goal:
+The Learning tab should become a full personal knowledge management and question-building system.
+
+Core idea:
+Knowledge is hierarchical and editable.
+
+Structure:
+Knowledge Domain
+→ Knowledge Area
+→ Branch
+→ Sub-Branch
+→ Lesson
+→ Question Bank
+→ Attempts / Reviews / Mastery
+
+Example:
+الذكاء الاصطناعي
+→ تعلم الآلة
+→ البيانات
+→ الإحصاء
+→ الاحتمالات
+→ الجبر الخطي
+→ البرمجة
+→ أساسيات الحاسب
+→ الرياضيات
+
+Another example:
+الأمن السيبراني
+→ الشبكات
+→ البرمجة
+→ أنظمة التشغيل
+→ الويب
+→ التشفير
+→ اختبار الاختراق
+
+Front-end requirements:
+
+Inside the Learning tab, add 4 internal sections using a segmented control:
+
+1. خريطة المعرفة
+2. بنك الأسئلة
+3. مولّد الأسئلة
+4. ملفات التعلم
+
+Section 1: خريطة المعرفة
+Show a large editable knowledge tree.
+
+Each node should show:
+- title
+- type: مجال / معرفة / فرع / فرع فرعي / درس
+- mastery percentage
+- status:
+  - جديد
+  - قيد التعلم
+  - أتقنته
+  - يحتاج مراجعة
+  - أساس ناقص
+- parent dependency
+- child branches count
+- questions count
+
+Actions per node:
+- إضافة فرع
+- إضافة درس
+- تعديل الاسم
+- نقل
+- أرشفة
+- عرض الأسئلة
+- عرض المتطلبات السابقة
+
+Do not make it look flat.
+It must show hierarchy clearly.
+
+Section 2: بنك الأسئلة
+Create a question bank UI.
+
+Question types:
+- اختيار من متعدد
+- صح / خطأ
+- سؤال نصي
+- سؤال مع صورة
+- سؤال مع فيديو
+- سؤال مع مقطع صوت
+- سؤال ترتيب خطوات
+- سؤال تطبيق عملي
+- سؤال شرح بكلامك
+
+Each question card should show:
+- question title
+- question type
+- linked knowledge node
+- difficulty: سهل / متوسط / صعب
+- mastery impact
+- last answered
+- correct / incorrect count
+- review date
+- buttons:
+  - حل السؤال
+  - تعديل
+  - نقل إلى معرفة أخرى
+  - إضافة مراجعة
+
+Add filters:
+- by knowledge domain
+- by branch
+- by question type
+- by difficulty
+- by review status
+- by weak topics
+
+Section 3: مولّد الأسئلة
+Create a mock AI question generator screen.
+
+Input methods:
+- Paste text
+- Upload image placeholder
+- Upload video placeholder
+- Paste YouTube link
+- Paste article link
+- Manual lesson notes
+
+Important:
+No real parsing.
+No real AI call.
+Use mock output only.
+
+For YouTube:
+Add input field:
+“ضع رابط YouTube هنا”
+
+Button:
+“حلّل المقطع وحوّله إلى أسئلة”
+
+When clicked, show mock generated result:
+- video title
+- extracted topics
+- suggested knowledge branch
+- generated questions
+- question types
+- difficulty
+- button: “أرسل إلى بنك الأسئلة”
+- button: “أرسل إلى خريطة المعرفة”
+
+Generated mock questions should include:
+- multiple choice
+- text question
+- explanation question
+- image/video-based placeholder question
+
+Show future backend note:
+“لاحقًا سيتم إرسال الرابط إلى n8n لتحليل المقطع وتوليد الأسئلة.”
+
+Section 4: ملفات التعلم
+Create a learning files organizer.
+
+File types:
+- نص
+- صورة
+- فيديو
+- رابط YouTube
+- رابط مقال
+- PDF placeholder
+- ملاحظات يدوية
+
+Each file should be linked to:
+- knowledge domain
+- branch
+- lesson
+- generated questions
+- review queue
+
+Actions:
+- إضافة ملف
+- ربط بمعرفة
+- توليد أسئلة
+- نقل
+- تعديل
+- أرشفة
+
+Back-end mock service requirements:
+
+Create or update:
+services/learningService.ts
+
+Add mock functions:
+- getKnowledgeTree()
+- createKnowledgeNode(parentId, nodeData)
+- updateKnowledgeNode(nodeId, updates)
+- moveKnowledgeNode(nodeId, newParentId)
+- archiveKnowledgeNode(nodeId)
+- getQuestionsByKnowledgeNode(nodeId)
+- createQuestion(questionData)
+- updateQuestion(questionId, updates)
+- moveQuestion(questionId, targetKnowledgeNodeId)
+- generateQuestionsFromTextMock(text)
+- generateQuestionsFromYouTubeMock(url)
+- generateQuestionsFromImageMock(file)
+- generateQuestionsFromVideoMock(file)
+- addGeneratedQuestionsToBank(questions)
+- linkFileToKnowledgeNode(fileId, nodeId)
+- getLearningFiles()
+- createLearningFile(fileData)
+- updateReviewSchedule(questionId, result)
+
+Types:
+Create or update types:
+- KnowledgeNode
+- KnowledgeNodeType
+- Question
+- QuestionType
+- QuestionDifficulty
+- LearningFile
+- GeneratedQuestionSet
+- ReviewSchedule
+- MasteryRecord
+
+Mock data:
+Create rich mock data for:
+- AI knowledge tree
+- Cybersecurity knowledge tree
+- Programming knowledge tree
+- Math knowledge tree
+- Question bank with multiple question types
+- YouTube generated questions mock
+- Learning files mock
+
+Important architecture:
+The UI must never parse YouTube directly.
+The UI must call learningService.generateQuestionsFromYouTubeMock(url).
+Later, this function will call the n8n backend.
+
+Future n8n backend contract:
+Add comments only, not real calls.
+
+Future flow:
+Front-end
+→ learningService
+→ n8n webhook
+→ YouTube transcript/extraction workflow
+→ AI question generator
+→ returns structured questions
+→ NIBRRAS stores them in learning system
+
+Acceptance test:
+The update is successful only if:
+1. Learning tab has 4 internal sections:
+   - خريطة المعرفة
+   - بنك الأسئلة
+   - مولّد الأسئلة
+   - ملفات التعلم
+2. Knowledge is hierarchical, not a flat list.
+3. The user can visually see domain → branch → sub-branch → lesson.
+4. Question bank supports multiple question types.
+5. YouTube link input exists.
+6. YouTube generator produces mock questions.
+7. Generated questions can be sent to question bank in mock mode.
+8. Learning files can be organized and linked to knowledge nodes.
+9. No real APIs are called.
+10. No paid services are used.
+11. Front-end and Back-end remain separated through learningService.
