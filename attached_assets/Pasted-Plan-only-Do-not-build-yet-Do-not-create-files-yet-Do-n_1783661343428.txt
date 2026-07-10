@@ -1,0 +1,178 @@
+Plan only. Do not build yet. Do not create files yet. Do not call external APIs.
+
+I want to build a free-first mobile-first PWA prototype called NIBRRAS / نِبراس.
+
+Important rules:
+- Use free options only.
+- No paid APIs.
+- No paid hosting.
+- No OpenAI API.
+- No Gemini API.
+- No paid Hugging Face endpoints.
+- No real n8n connection yet.
+- No API keys.
+- No secrets.
+- No real deletion.
+- Use mock data only in Phase 1.
+- Arabic-first, RTL, dark mode, premium mobile UI.
+- Strictly separate Front-end and Back-end.
+
+Project idea:
+NIBRRAS is a private personal AI control app for one user.
+It starts with a chat screen like ChatGPT.
+The app will later connect to n8n as the backend, but for now use mock services only.
+
+Front-end means:
+- Chat screen
+- Voice button
+- Camera button
+- Workflows screen
+- Agents screen
+- Agent details screen
+- Learning screen
+- Deep Search screen
+- Backup screen
+- Settings screen
+- Logs screen
+- Arabic RTL UI
+
+Back-end means:
+- n8n workflows
+- n8n agents
+- memory
+- databases
+- real deep search
+- real model calls
+- real prompt/model/tool updates
+- backups
+- GitHub exports
+- MCP
+- API calls
+
+Do not mix them.
+For Phase 1, build only the Front-end and mock Back-end services.
+
+Required screens:
+1. Chat Home
+First screen.
+Arabic RTL chat UI.
+Buttons:
+- علّمني
+- ابحث بعمق
+- Workflows
+- Agents
+- Camera
+- Voice
+
+2. Workflows
+Mock n8n workflows.
+Show:
+- name
+- status
+- last run
+- connected agents
+- buttons: تشغيل، عرض Agents، السجلات، تثبيت، إخفاء من التطبيق
+Do not add delete from n8n.
+
+3. Agents
+Show agents inside workflow.
+Each agent has:
+- name
+- role
+- current model
+- tools
+- databases
+- prompt status
+- last error
+
+4. Agent Details
+Mock editor only:
+- Prompt editor
+- Model selector
+- Tool selector
+- Database connections
+- Rules
+- Logs
+- Backup history
+All edits are mock only.
+Show warning: سيتم حفظ نسخة احتياطية قبل أي تعديل حقيقي لاحقًا.
+
+5. Adaptive Learning Engine
+A learning system based on dependency graph, not courses.
+Example:
+AI → Machine Learning → Data → Statistics → Probability → Linear Algebra → Calculus → Programming → Computer Science → Mathematics
+
+Cybersecurity = Networking + Programming + Operating Systems + Web + Cryptography
+
+Show:
+- Learning goal selector
+- Skill tree / dependency graph
+- Knowledge gaps
+- Today’s lesson
+- Review queue
+- “اختبر فهمي” button
+- Mastery score
+- Soft language only. Do not shame the user.
+
+6. Free Deep Search
+Mock UI for future free deep search.
+Future backend concept:
+SearXNG + n8n + Playwright + open-source reranker + citations.
+Show:
+- search input
+- depth selector: سريع، متوسط، عميق
+- source filters: Official Docs, GitHub, Reddit/HN, YouTube, Articles, Research Papers
+- result cards with title, source type, trust score, summary, URL placeholder
+- final answer panel with mock citations
+
+7. Backup History
+Mock version history:
+- version
+- date
+- changed item
+- restore button
+- status
+
+8. Settings
+Show:
+- n8n connection status mock
+- Webhook URL placeholder
+- API base URL placeholder
+- GitHub backup status mock
+- Free-only mode enabled
+- Strict Front-end / Back-end separation enabled
+- Dangerous actions confirmation enabled
+
+Code structure:
+- components/
+- pages/
+- data/mockData.ts
+- services/n8nService.ts
+- services/learningService.ts
+- services/deepSearchService.ts
+- services/backupService.ts
+- types/
+
+Create placeholder service functions only:
+- listWorkflows()
+- getWorkflowAgents(workflowId)
+- getAgentDetails(agentId)
+- updateAgentPromptMock(agentId, prompt)
+- updateAgentModelMock(agentId, model)
+- updateAgentToolsMock(agentId, tools)
+- createBackupMock(target)
+- runWorkflowMock(workflowId)
+- runDeepSearchMock(query)
+- updateLearningProfileMock(event)
+
+Acceptance test:
+Before building, tell me:
+1. What stack you will use.
+2. Which files you will create.
+3. How you will keep Front-end separate from Back-end.
+4. How you will avoid paid services.
+5. How you will avoid real n8n/API calls.
+6. What the first prototype will include.
+7. What you will not build in Phase 1.
+
+Wait for my approval before building.
