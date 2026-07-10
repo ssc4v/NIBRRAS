@@ -1,0 +1,105 @@
+Before building, update the app information architecture and layout.
+
+Goal:
+Reorder all buttons, tabs, cards, and fields so sections do not mix with each other.
+
+Use this structure exactly:
+
+Main bottom navigation must have only 4 tabs:
+1. المحادثة
+2. التعلم
+3. البحث
+4. التحكم
+
+Tab 1: المحادثة
+Purpose: natural AI interaction only.
+Include:
+- NIBRRAS header
+- Chat messages
+- Text input
+- Voice button
+- Camera button
+- Attachment button
+- Only 3 quick action chips above the input:
+  - علّمني
+  - ابحث بعمق
+  - شغّل Workflow
+
+Do not show workflow cards, agent cards, learning graphs, or search results on the Chat home screen.
+Chat is for conversation only.
+
+Tab 2: التعلم
+Purpose: Adaptive Learning Engine only.
+Include:
+- Learning goal selector
+- Learning dependency graph / skill tree
+- Knowledge gaps panel
+- Today’s lesson
+- Review queue
+- “اختبر فهمي” button
+- Mastery scores
+
+Do not show Workflows, Agents, Prompt editor, Logs, or Deep Search results in this tab.
+
+Tab 3: البحث
+Purpose: Free Deep Search only.
+Include:
+- Search input
+- Search depth selector: سريع / متوسط / عميق
+- Source filters:
+  - Official Docs
+  - GitHub
+  - Reddit/Hacker News
+  - YouTube
+  - Articles
+  - Research Papers
+- Results list
+- Final answer panel
+- Save to NIBRRAS memory mock button
+
+Do not show learning graph, agents, workflows, or prompt editor here.
+
+Tab 4: التحكم
+Purpose: n8n control center only.
+Include internal sections:
+- Workflows
+- Agents
+- Databases
+- Tools
+- Prompts
+- Logs
+- Backups
+- Settings
+
+This tab is for operational control only.
+Do not show learning lessons or Deep Search source filters here.
+
+Inside التحكم:
+Use a segmented control or vertical menu:
+- Workflows
+- Agents
+- Agent Details
+- Backups
+- Logs
+- Settings
+
+Important layout rules:
+- Never mix learning, search, and n8n control content in the same screen.
+- Chat can trigger other sections, but it must not display their full dashboards.
+- Every screen must have one clear purpose.
+- Keep Arabic RTL.
+- Keep black-and-white monochrome theme.
+- Keep mobile-first layout.
+- Keep strict Front-end / Back-end separation.
+- Use mock data only.
+- No real API calls.
+- No paid services.
+
+Acceptance test:
+The layout is correct only if:
+1. Bottom navigation has exactly 4 main tabs.
+2. Chat tab contains chat only plus 3 quick action chips.
+3. Learning tab contains only learning features.
+4. Search tab contains only deep search features.
+5. Control tab contains only n8n/workflow/agent/admin features.
+6. No section feels mixed with another section.
