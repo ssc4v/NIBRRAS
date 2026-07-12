@@ -5,17 +5,16 @@ const CHAT_URL =
   import.meta.env.VITE_NIRBAS_CHAT_URL ||
   'https://sc4v.app.n8n.cloud/webhook/nirbas-chat';
 
-type BackendError = {
-  code?: string;
-  message?: string;
-};
+export type NirbasModel = 'openai' | 'gemini' | 'deepseek';
 
 type ChatResponse = {
   ok?: boolean;
   status?: string;
+  model?: NirbasModel;
   reply?: string;
+  output?: string;
   executionId?: string;
-  error?: BackendError;
+  error?: { message?: string };
 };
 
 async function postJson<T>(url: string, body: unknown): Promise<T> {
@@ -25,43 +24,38 @@ async function postJson<T>(url: string, body: unknown): Promise<T> {
     body: JSON.stringify(body),
   });
 
-  let data: unknown;
-  try {
-    data = await response.json();
-  } catch {
-    throw new Error(`استجابة غير صالحة من الخادم (${response.status})`);
-  }
-
+  const data = await response.json().catch(() => null);
   if (!response.ok) {
-    const message =
-      typeof data === 'object' && data && 'error' in data
-        ? String((data as { error?: BackendError }).error?.message || `HTTP ${response.status}`)
-        : `HTTP ${response.status}`;
-    throw new Error(message);
+    throw new Error(data?.error?.message || `HTTP ${response.status}`);
   }
-
   return data as T;
 }
 
 export const getInitialMessages = async (): Promise<Message[]> => [...mockMessages];
 
-export const sendMessage = async (content: string): Promise<Message> => {
-  const data = await postJson<ChatResponse>(CHAT_URL, { message: content });
+export const sendMessage = async (
+  content: string,
+  model: NirbasModel = 'openai',
+  sessionId = 'nibrras-app',
+): Promise<Message> => {
+  const data = await postJson<ChatResponse>(CHAT_URL, {
+    message: content,
+    model,
+    sessionId,
+    userId: 'fahad',
+  });
 
-  if (data.ok !== true || data.status === 'not_implemented' || !data.reply?.trim()) {
-    throw new Error(
-      data.error?.message ||
-        'لم ينفذ خادم نبراس المحادثة فعليًا، لذلك لم تُعرض رسالة نجاح.'
-    );
+  const reply = data.reply?.trim() || data.output?.trim();
+  if (!reply) {
+    throw new Error(data.error?.message || 'لم يُرجع نموذج نبراس ردًا صالحًا.');
   }
 
   return {
     id: data.executionId || `${Date.now()}-assistant`,
     role: 'assistant',
-    content: data.reply,
+    content: reply,
     timestamp: new Date().toISOString(),
   };
 };
 
-// Compatibility export while old imports are removed gradually.
 export const sendMessageMock = sendMessage;
