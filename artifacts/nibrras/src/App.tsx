@@ -4,6 +4,7 @@ import { Toaster } from 'sonner';
 
 import Layout from './components/layout/Layout';
 import ChatPage from './pages/chat';
+import VoiceCallPage from './pages/voice-call';
 import LearningPage from './pages/learning';
 import SearchPage from './pages/search';
 import ControlPage from './pages/control';
@@ -13,39 +14,25 @@ import SystemPage from './pages/system';
 const queryClient = new QueryClient();
 
 function NotFound() {
-  return (
-    <div className="flex flex-col items-center justify-center h-full text-center p-4">
-      <h1 className="text-2xl font-bold text-foreground">404</h1>
-      <p className="mt-2 text-sm text-muted-foreground">الصفحة غير موجودة.</p>
-    </div>
-  );
+  return <div className="flex h-full flex-col items-center justify-center p-4 text-center"><h1 className="text-2xl font-bold">404</h1><p className="mt-2 text-sm text-muted-foreground">الصفحة غير موجودة.</p></div>;
 }
 
-function Router() {
-  return (
-    <Layout>
-      <Switch>
-        <Route path="/" component={ChatPage} />
-        <Route path="/learning" component={LearningPage} />
-        <Route path="/search" component={SearchPage} />
-        <Route path="/control" component={ControlPage} />
-        <Route path="/projects" component={ProjectStorePage} />
-        <Route path="/system" component={SystemPage} />
-        <Route component={NotFound} />
-      </Switch>
-    </Layout>
-  );
+function Routes() {
+  return <Layout><Switch>
+    <Route path="/" component={ChatPage} />
+    <Route path="/call" component={VoiceCallPage} />
+    <Route path="/learning" component={LearningPage} />
+    <Route path="/search" component={SearchPage} />
+    <Route path="/control" component={ControlPage} />
+    <Route path="/projects" component={ProjectStorePage} />
+    <Route path="/system" component={SystemPage} />
+    <Route component={NotFound} />
+  </Switch></Layout>;
 }
 
-function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
-        <Router />
-      </WouterRouter>
-      <Toaster theme="dark" position="top-center" />
-    </QueryClientProvider>
-  );
+export default function App() {
+  return <QueryClientProvider client={queryClient}>
+    <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}><Routes /></WouterRouter>
+    <Toaster theme="dark" position="top-center" richColors />
+  </QueryClientProvider>;
 }
-
-export default App;
