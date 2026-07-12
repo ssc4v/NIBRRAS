@@ -1,61 +1,53 @@
-import { mockMessages } from '../data/mockData';
-import { Message } from '../types';
+import type { Message } from '../types';
+import { callNirbas, reportClientError } from './backendClient';
 
-const CHAT_URL =
-  import.meta.env.VITE_NIRBAS_CHAT_URL ||
-  'https://sc4v.app.n8n.cloud/webhook/nirbas-chat';
+export type ChatModel = 'openai' | 'gemini' | 'deepseek';
 
-export type NirbasModel = 'openai' | 'gemini' | 'deepseek';
+const SESSION_KEY = 'nirbas-chat-session';
+const MODEL_KEY = 'nirbas-chat-model';
 
-type ChatResponse = {
-  ok?: boolean;
-  status?: string;
-  model?: NirbasModel;
-  reply?: string;
-  output?: string;
-  executionId?: string;
-  error?: { message?: string };
-};
-
-async function postJson<T>(url: string, body: unknown): Promise<T> {
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-
-  const data = await response.json().catch(() => null);
-  if (!response.ok) {
-    throw new Error(data?.error?.message || `HTTP ${response.status}`);
+export function getChatSessionId(): string {
+  let value = localStorage.getItem(SESSION_KEY);
+  if (!value) {
+    value = `web-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    localStorage.setItem(SESSION_KEY, value);
   }
-  return data as T;
+  return value;
 }
 
-export const getInitialMessages = async (): Promise<Message[]> => [...mockMessages];
+export function getSavedModel(): ChatModel {
+  const value = localStorage.getItem(MODEL_KEY);
+  return value === 'gemini' || value === 'deepseek' ? value : 'openai';
+}
 
-export const sendMessage = async (
-  content: string,
-  model: NirbasModel = 'openai',
-  sessionId = 'nibrras-app',
-): Promise<Message> => {
-  const data = await postJson<ChatResponse>(CHAT_URL, {
-    message: content,
-    model,
-    sessionId,
-    userId: 'fahad',
-  });
+export function saveModel(model: ChatModel): void {
+  localStorage.setItem(MODEL_KEY, model);
+}
 
-  const reply = data.reply?.trim() || data.output?.trim();
-  if (!reply) {
-    throw new Error(data.error?.message || 'لم يُرجع نموذج نبراس ردًا صالحًا.');
+export async function getInitialMessages(): Promise<Message[]> {
+  return [];
+}
+
+export async function sendMessage(content: string, model: ChatModel = getSavedModel()): Promise<Message> {
+  try {
+    const response = await callNirbas('chat', {
+      message: content,
+      model,
+      sessionId: getChatSessionId(),
+      userId: 'fahad',
+    });
+
+    const reply = String(response.reply ?? response.output ?? '').trim();
+    if (!reply) throw new Error('النموذج لم يرجع ردًا فعليًا');
+
+    return {
+      id: response.executionId ?? `${Date.now()}`,
+      role: 'assistant',
+      content: reply,
+      timestamp: new Date().toISOString(),
+    };
+  } catch (error) {
+    void reportClientError('chat-ui', error, { model });
+    throw error;
   }
-
-  return {
-    id: data.executionId || `${Date.now()}-assistant`,
-    role: 'assistant',
-    content: reply,
-    timestamp: new Date().toISOString(),
-  };
-};
-
-export const sendMessageMock = sendMessage;
+}
