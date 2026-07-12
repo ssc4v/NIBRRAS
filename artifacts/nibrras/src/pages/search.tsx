@@ -1,193 +1,114 @@
 import { useState } from 'react';
-import { runDeepSearchMock, saveToMemoryMock } from '../services/deepSearchService';
-import { SearchResult } from '../types';
-import { Input } from '@/components/ui/input';
+import { AlertCircle, Loader2, Save, Search } from 'lucide-react';
+import { runDeepSearch, saveToMemory } from '../services/deepSearchService';
+import type { SearchResult } from '../types';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Search, Loader2, Save, FileText, Database, ShieldCheck, Link as LinkIcon } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 
 export default function SearchPage() {
   const [query, setQuery] = useState('');
-  const [depth, setDepth] = useState<'سريع' | 'متوسط' | 'عميق'>('متوسط');
-  const [sources, setSources] = useState<string[]>(['Official Docs', 'Articles', 'Research Papers']);
-  
   const [loading, setLoading] = useState(false);
-  const [hasSearched, setHasSearched] = useState(false);
-  const [results, setResults] = useState<SearchResult[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
   const [answer, setAnswer] = useState('');
+  const [results, setResults] = useState<SearchResult[]>([]);
   const [citations, setCitations] = useState<string[]>([]);
-  
-  const allSources = ['Official Docs', 'GitHub', 'Reddit/Hacker News', 'YouTube', 'Articles', 'Research Papers'];
+  const [searchId, setSearchId] = useState('');
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!query.trim()) return;
+  const handleSearch = async (event: React.FormEvent) => {
+    event.preventDefault();
+    const value = query.trim();
+    if (!value || loading) return;
 
     setLoading(true);
-    setHasSearched(true);
-    
-    const res = await runDeepSearchMock(query, { depth, sources });
-    
-    setResults(res.results);
-    setAnswer(res.answer);
-    setCitations(res.citations);
-    setLoading(false);
+    setError('');
+    setAnswer('');
+    setResults([]);
+    setCitations([]);
+    setSearchId('');
+
+    try {
+      const response = await runDeepSearch(value, {
+        depth: 'متوسط',
+        sources: ['Official Docs', 'Articles', 'Research Papers'],
+      });
+      setAnswer(response.answer);
+      setResults(response.results);
+      setCitations(response.citations);
+      setSearchId(response.searchId || '');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'فشل البحث العميق.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const toggleSource = (src: string) => {
-    if (sources.includes(src)) {
-      setSources(sources.filter(s => s !== src));
-    } else {
-      setSources([...sources, src]);
+  const handleSave = async () => {
+    if (!searchId || saving) {
+      setError('لا توجد نتيجة بحث حقيقية قابلة للحفظ.');
+      return;
+    }
+    setSaving(true);
+    setError('');
+    try {
+      await saveToMemory(searchId);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'فشل حفظ نتيجة البحث.');
+    } finally {
+      setSaving(false);
     }
   };
 
   return (
-    <div className="flex flex-col h-full bg-background overflow-y-auto">
-      <header className="px-6 py-5 border-b border-border bg-card sticky top-0 z-10">
-        <h1 className="font-bold text-2xl tracking-tight mb-4">البحث العميق</h1>
-        
-        <form onSubmit={handleSearch} className="space-y-4">
-          <div className="relative">
-            <Input 
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="اكتب استفسارك هنا للبحث المعمق..."
-              className="pl-10 pr-4 h-12 bg-background border-border rounded-xl text-sm w-full"
-            />
-            <Button 
-              type="submit" 
-              size="icon" 
-              variant="ghost" 
-              className="absolute left-1 top-1.5 h-9 w-9 text-muted-foreground hover:text-foreground"
-              disabled={loading}
-            >
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-            </Button>
-          </div>
-
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-foreground">العمق:</span>
-              <div className="flex gap-1.5 p-1 bg-muted rounded-lg inline-flex">
-                {['سريع', 'متوسط', 'عميق'].map((d) => (
-                  <button
-                    key={d}
-                    type="button"
-                    onClick={() => setDepth(d as any)}
-                    className={`text-[10px] px-3 py-1.5 rounded-md font-medium transition-all ${
-                      depth === d ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'
-                    }`}
-                  >
-                    {d}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <span className="text-xs font-semibold text-foreground">المصادر:</span>
-              <div className="flex flex-wrap gap-2">
-                {allSources.map(src => (
-                  <button
-                    key={src}
-                    type="button"
-                    onClick={() => toggleSource(src)}
-                    className={`text-[10px] px-2.5 py-1 rounded-full border transition-all ${
-                      sources.includes(src) 
-                        ? 'border-foreground bg-foreground text-background' 
-                        : 'border-border bg-background text-muted-foreground hover:border-foreground/50'
-                    }`}
-                  >
-                    {src}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
+    <div className="h-full overflow-y-auto bg-background">
+      <header className="sticky top-0 z-10 border-b border-border bg-card px-6 py-5">
+        <h1 className="mb-4 text-2xl font-bold">البحث العميق</h1>
+        <form onSubmit={handleSearch} className="flex gap-2">
+          <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="اكتب استفسارك هنا…" disabled={loading} />
+          <Button type="submit" disabled={loading || !query.trim()}>
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+          </Button>
         </form>
       </header>
 
-      <div className="p-6 space-y-6 pb-24">
-        {loading && (
-          <div className="py-12 flex flex-col items-center justify-center space-y-4">
-            <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-            <span className="text-sm text-muted-foreground font-mono">Searching across {sources.length} sources...</span>
+      <main className="space-y-5 p-6 pb-24">
+        {loading && <p className="text-sm text-muted-foreground">جارٍ انتظار نتيجة حقيقية من n8n…</p>}
+
+        {error && (
+          <div className="flex items-start gap-2 rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>{error}</span>
           </div>
         )}
 
-        {!loading && hasSearched && results.length > 0 && (
-          <>
-            {/* Final Answer */}
-            <Card className="bg-foreground text-background border-none rounded-xl">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                  <Database className="w-4 h-4" /> الخلاصة المجمعة
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-sm leading-relaxed text-background/90">
-                  {answer}
-                </p>
-                <div className="flex justify-end pt-2 border-t border-background/20 mt-4">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => saveToMemoryMock('test-id')}
-                    className="h-8 text-xs bg-transparent border-background/30 text-background hover:bg-background hover:text-foreground transition-colors"
-                  >
-                    <Save className="w-3.5 h-3.5 ml-1.5" />
-                    حفظ في الذاكرة
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Results List */}
-            <div className="space-y-4 pt-4">
-              <h3 className="font-bold text-lg flex items-center gap-2">
-                <FileText className="w-5 h-5" /> المصادر المرجعية
-              </h3>
-              
-              <div className="grid gap-4">
-                {results.map(res => {
-                  const isCited = citations.includes(res.id);
-                  return (
-                    <Card key={res.id} className={`bg-card transition-all ${isCited ? 'border-foreground/40 shadow-sm' : ''}`}>
-                      <CardContent className="p-4">
-                        <div className="flex justify-between items-start mb-2">
-                          <Badge variant="outline" className="text-[10px] font-mono rounded-sm">
-                            {res.sourceType}
-                          </Badge>
-                          <div className="flex items-center gap-1 text-[10px] font-mono text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-                            <ShieldCheck className="w-3 h-3" />
-                            {res.trustScore}%
-                          </div>
-                        </div>
-                        <h4 className="font-semibold text-sm mb-1 leading-snug">{res.title}</h4>
-                        <p className="text-xs text-muted-foreground leading-relaxed mb-3">
-                          {res.summary}
-                        </p>
-                        <div className="flex items-center text-[10px] text-muted-foreground">
-                          <LinkIcon className="w-3 h-3 mr-1" />
-                          <span className="truncate">{res.url}</span>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
+        {answer && (
+          <section className="rounded-xl border border-border bg-card p-5">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <h2 className="font-bold">الخلاصة المجمعة</h2>
+              <Button variant="outline" size="sm" onClick={handleSave} disabled={saving || !searchId}>
+                {saving ? <Loader2 className="ml-1 h-4 w-4 animate-spin" /> : <Save className="ml-1 h-4 w-4" />}
+                حفظ
+              </Button>
             </div>
-          </>
+            <p className="text-sm leading-7">{answer}</p>
+          </section>
         )}
 
-        {!loading && hasSearched && results.length === 0 && (
-          <div className="py-12 text-center text-muted-foreground text-sm">
-            لم يتم العثور على نتائج. جرب تغيير مصادر البحث أو الكلمات المفتاحية.
-          </div>
+        {results.map((result) => (
+          <article key={result.id} className="rounded-xl border border-border bg-card p-4">
+            <h3 className="font-semibold">{result.title}</h3>
+            <p className="mt-2 text-sm text-muted-foreground">{result.summary}</p>
+            <p className="mt-2 truncate text-xs text-muted-foreground">{result.url}</p>
+          </article>
+        ))}
+
+        {citations.length > 0 && (
+          <section className="rounded-xl border border-border p-4">
+            <h3 className="mb-2 font-semibold">المراجع</h3>
+            {citations.map((citation) => <p key={citation} className="text-xs text-muted-foreground">{citation}</p>)}
+          </section>
         )}
-      </div>
+      </main>
     </div>
   );
 }
