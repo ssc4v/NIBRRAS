@@ -4,15 +4,37 @@ import { callNirbas, reportClientError } from './backendClient';
 export type ChatModel = 'openai' | 'gemini' | 'deepseek';
 
 const SESSION_KEY = 'nirbas-chat-session';
+const USER_KEY = 'nirbas-user-id';
 const MODEL_KEY = 'nirbas-chat-model';
+const MAX_MESSAGE_LENGTH = 12_000;
+
+function createId(prefix: string): string {
+  const value = typeof crypto !== 'undefined' && 'randomUUID' in crypto
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  return `${prefix}-${value}`;
+}
 
 export function getChatSessionId(): string {
   let value = localStorage.getItem(SESSION_KEY);
   if (!value) {
-    value = `web-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    value = createId('web');
     localStorage.setItem(SESSION_KEY, value);
   }
   return value;
+}
+
+export function getAnonymousUserId(): string {
+  let value = localStorage.getItem(USER_KEY);
+  if (!value) {
+    value = createId('user');
+    localStorage.setItem(USER_KEY, value);
+  }
+  return value;
+}
+
+export function resetChatSession(): void {
+  localStorage.setItem(SESSION_KEY, createId('web'));
 }
 
 export function getSavedModel(): ChatModel {
@@ -29,25 +51,32 @@ export async function getInitialMessages(): Promise<Message[]> {
 }
 
 export async function sendMessage(content: string, model: ChatModel = getSavedModel()): Promise<Message> {
+  const message = content.trim();
+  if (!message) throw new Error('اكتب رسالة قبل الإرسال');
+  if (message.length > MAX_MESSAGE_LENGTH) throw new Error(`الرسالة طويلة جدًا. الحد الأقصى ${MAX_MESSAGE_LENGTH.toLocaleString('ar-SA')} حرف.`);
+  if (!navigator.onLine) throw new Error('لا يوجد اتصال بالإنترنت');
+
   try {
     const response = await callNirbas('chat', {
-      message: content,
+      message,
       model,
       sessionId: getChatSessionId(),
-      userId: 'fahad',
+      userId: getAnonymousUserId(),
+      client: 'nirbas-web',
+      locale: 'ar-SA',
     });
 
     const reply = String(response.reply ?? response.output ?? '').trim();
     if (!reply) throw new Error('النموذج لم يرجع ردًا فعليًا');
 
     return {
-      id: response.executionId ?? `${Date.now()}`,
+      id: response.executionId ?? createId('message'),
       role: 'assistant',
       content: reply,
       timestamp: new Date().toISOString(),
     };
   } catch (error) {
-    void reportClientError('chat-ui', error, { model });
+    void reportClientError('chat-ui', error, { model, messageLength: message.length });
     throw error;
   }
 }
