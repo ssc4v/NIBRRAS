@@ -13,7 +13,7 @@ async function post<T>(path: string, body: unknown): Promise<T> {
   return data as T;
 }
 
-export const planAction = (request: Record<string, unknown>) => post<any>('nirbas-action-engine', { action: 'plan', ...request });
+export const planAction = (request: Record<string, unknown>) => post<any>('nirbas-action-engine', { action: 'plan', intent: String(request.intent || 'update_system_test'), payload: request });
 export const approveAction = (actionId: string) => post<any>('nirbas-action-engine', { action: 'approve', actionId });
 export const rejectAction = (actionId: string) => post<any>('nirbas-action-engine', { action: 'reject', actionId });
 export const rollbackAction = (actionId: string) => post<any>('nirbas-action-engine', { action: 'rollback', actionId });
