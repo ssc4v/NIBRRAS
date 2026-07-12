@@ -7,8 +7,8 @@ on:
         description: Public GitHub repository URL
         required: true
         type: string
-      callback_url:
-        description: n8n resume callback URL
+      resumeUrl:
+        description: n8n resume callback URL injected by dispatchAndWait
         required: true
         type: string
       requested_ref:
@@ -49,7 +49,6 @@ jobs:
           rm -rf source/.git
 
       - name: Inventory and policy checks
-        id: inspect
         shell: bash
         run: |
           set -euo pipefail
@@ -60,7 +59,6 @@ jobs:
           grep -RIlE '(BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY|AKIA[0-9A-Z]{16})' . --exclude-dir=node_modules --exclude-dir=.venv 2>/dev/null | head -100 > ../secret-pattern-files.txt || true
 
       - name: Ecosystem-safe validation
-        id: validate
         shell: bash
         run: |
           set -uo pipefail
@@ -135,7 +133,7 @@ jobs:
         if: always()
         shell: bash
         env:
-          CALLBACK_URL: ${{ inputs.callback_url }}
+          CALLBACK_URL: ${{ inputs.resumeUrl }}
         run: |
           curl --fail-with-body --retry 3 --max-time 30 \
             -H 'Content-Type: application/json' \
