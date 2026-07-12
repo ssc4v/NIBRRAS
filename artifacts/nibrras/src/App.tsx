@@ -8,6 +8,7 @@ import LearningPage from './pages/learning';
 import SearchPage from './pages/search';
 import ControlPage from './pages/control';
 import ProjectStorePage from './pages/project-store';
+import SystemPage from './pages/system';
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ function Router() {
         <Route path="/search" component={SearchPage} />
         <Route path="/control" component={ControlPage} />
         <Route path="/projects" component={ProjectStorePage} />
+        <Route path="/system" component={SystemPage} />
         <Route component={NotFound} />
       </Switch>
     </Layout>
