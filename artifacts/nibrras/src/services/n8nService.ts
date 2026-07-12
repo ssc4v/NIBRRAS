@@ -1,40 +1,46 @@
-import { mockWorkflows, mockAgents, mockLogs } from '../data/mockData';
-import { Workflow, WorkflowAgent, LogEntry } from '../types';
+import type { Workflow, WorkflowAgent, LogEntry } from '../types';
 import { callNirbas } from './backendClient';
 
-export const listWorkflows = async (): Promise<Workflow[]> => [...mockWorkflows];
+type ActionResult = { ok?: boolean; status?: string; executionId?: string; message?: string };
 
-export const getWorkflowAgents = async (workflowId: string): Promise<WorkflowAgent[]> =>
-  mockAgents.filter(a => a.workflowId === workflowId);
+const requireExecuted = (result: ActionResult, label: string): void => {
+  if (result.ok !== true || !result.executionId) {
+    throw new Error(result.message || `${label}: لم يتم إثبات تنفيذ العملية`);
+  }
+};
+
+export const listWorkflows = async (): Promise<Workflow[]> => [];
+export const getWorkflowAgents = async (_workflowId: string): Promise<WorkflowAgent[]> => [];
+export const getWorkflowLogsMock = async (_workflowId: string): Promise<LogEntry[]> => [];
+export const getAgentDetails = async (_agentId: string): Promise<WorkflowAgent | undefined> => undefined;
+export const getGlobalLogsMock = async (): Promise<LogEntry[]> => [];
 
 export const runWorkflowMock = async (workflowId: string): Promise<void> => {
-  await callNirbas('nirbas-workflow-runner', { workflowId, input: {} });
+  const result = await callNirbas<ActionResult>('nirbas-workflow-runner', { workflowId, input: {} });
+  requireExecuted(result, 'تشغيل Workflow');
 };
 
 export const installWorkflowMock = async (workflowId: string): Promise<void> => {
-  await callNirbas('nirbas-control-center', { action: 'install-workflow', workflowId });
+  const result = await callNirbas<ActionResult>('nirbas-control-center', { action: 'install-workflow', workflowId });
+  requireExecuted(result, 'تثبيت Workflow');
 };
 
 export const hideWorkflowMock = async (workflowId: string): Promise<void> => {
-  await callNirbas('nirbas-control-center', { action: 'hide-workflow', workflowId });
+  const result = await callNirbas<ActionResult>('nirbas-control-center', { action: 'hide-workflow', workflowId });
+  requireExecuted(result, 'إخفاء Workflow');
 };
 
-export const getWorkflowLogsMock = async (workflowId: string): Promise<LogEntry[]> =>
-  mockLogs.filter(l => l.source === workflowId);
-
-export const getAgentDetails = async (agentId: string): Promise<WorkflowAgent | undefined> =>
-  mockAgents.find(a => a.id === agentId);
-
 export const updateAgentPromptMock = async (agentId: string, prompt: string): Promise<void> => {
-  await callNirbas('nirbas-control-center', { action: 'update-agent-prompt', agentId, prompt });
+  const result = await callNirbas<ActionResult>('nirbas-control-center', { action: 'update-agent-prompt', agentId, prompt });
+  requireExecuted(result, 'تحديث تعليمات الوكيل');
 };
 
 export const updateAgentModelMock = async (agentId: string, model: string): Promise<void> => {
-  await callNirbas('nirbas-control-center', { action: 'update-agent-model', agentId, model });
+  const result = await callNirbas<ActionResult>('nirbas-control-center', { action: 'update-agent-model', agentId, model });
+  requireExecuted(result, 'تحديث نموذج الوكيل');
 };
 
 export const updateAgentToolsMock = async (agentId: string, tools: string[]): Promise<void> => {
-  await callNirbas('nirbas-control-center', { action: 'update-agent-tools', agentId, tools });
+  const result = await callNirbas<ActionResult>('nirbas-control-center', { action: 'update-agent-tools', agentId, tools });
+  requireExecuted(result, 'تحديث أدوات الوكيل');
 };
-
-export const getGlobalLogsMock = async (): Promise<LogEntry[]> => [...mockLogs];
