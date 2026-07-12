@@ -1,37 +1,89 @@
-import type { KnowledgeNode, Question, LearningFile, GeneratedQuestionSet, LearningProfile } from '../types';
+import { callNirbas, reportClientError } from './backendClient';
 
-const unavailable = (feature: string): never => {
-  throw new Error(`${feature}: هذه الميزة غير متصلة بخدمة حقيقية بعد`);
-};
+export interface LearningNode {
+  id: string;
+  parentId: string | null;
+  label: string;
+  type: string;
+  mastery: number;
+  status: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
 
-export const getLearningGraph = async (): Promise<LearningProfile> => unavailable('ملف التعلم');
-export const getTodayLesson = async () => unavailable('درس اليوم');
-export const getReviewQueue = async () => unavailable('قائمة المراجعة');
-export const updateLearningProfileMock = async (_event: unknown): Promise<void> => unavailable('تحديث ملف التعلم');
+export interface LearningFile {
+  id: string;
+  title: string;
+  type: string;
+  url: string | null;
+  linkedNodeId: string | null;
+  createdAt?: string;
+}
 
-export const getKnowledgeTree = async (): Promise<KnowledgeNode[]> => [];
-export const createKnowledgeNode = async (_parentId: string | null, _nodeData: Partial<KnowledgeNode>): Promise<KnowledgeNode> => unavailable('إضافة عقدة معرفة');
-export const updateKnowledgeNode = async (_nodeId: string, _updates: Partial<KnowledgeNode>): Promise<void> => unavailable('تعديل عقدة معرفة');
-export const moveKnowledgeNode = async (_nodeId: string, _newParentId: string | null): Promise<void> => unavailable('نقل عقدة معرفة');
-export const archiveKnowledgeNode = async (_nodeId: string): Promise<void> => unavailable('أرشفة عقدة معرفة');
+export interface LearningProfile {
+  mastery: number;
+  streak: number;
+  totalAnswered: number;
+  correctAnswered: number;
+  updatedAt?: string;
+}
 
-export const getQuestionsByKnowledgeNode = async (_nodeId?: string): Promise<Question[]> => [];
-export const createQuestion = async (_questionData: Partial<Question>): Promise<Question> => unavailable('إضافة سؤال');
-export const updateQuestion = async (_questionId: string, _updates: Partial<Question>): Promise<void> => unavailable('تعديل سؤال');
-export const moveQuestion = async (_questionId: string, _targetKnowledgeNodeId: string): Promise<void> => unavailable('نقل سؤال');
-export const updateReviewSchedule = async (_questionId: string, _result: 'correct' | 'incorrect'): Promise<void> => unavailable('تحديث نتيجة السؤال');
+export interface LearningGraph {
+  nodes: LearningNode[];
+  files: LearningFile[];
+  profile: LearningProfile;
+}
 
-export const generateQuestionsFromTextMock = async (_text: string): Promise<GeneratedQuestionSet> => unavailable('توليد أسئلة من نص');
-export const generateQuestionsFromYouTubeMock = async (_url: string): Promise<GeneratedQuestionSet> => unavailable('توليد أسئلة من يوتيوب');
-export const generateQuestionsFromImageMock = async (_file: unknown): Promise<GeneratedQuestionSet> => unavailable('توليد أسئلة من صورة');
-export const generateQuestionsFromVideoMock = async (_file: unknown): Promise<GeneratedQuestionSet> => unavailable('توليد أسئلة من فيديو');
-export const generateQuestionsFromFileMock = async (_fileId: string): Promise<GeneratedQuestionSet> => unavailable('توليد أسئلة من ملف');
-export const addGeneratedQuestionsToBank = async (_questions: Omit<Question, 'id'>[]): Promise<void> => unavailable('إضافة الأسئلة إلى البنك');
-export const addGeneratedQuestionsToMap = async (_questions: Omit<Question, 'id'>[]): Promise<void> => unavailable('إضافة الأسئلة إلى الخريطة');
+export interface Question {
+  id: string;
+  title: string;
+  type: string;
+  options: string[];
+  correctAnswer: unknown;
+  explanation: string;
+  difficulty: string;
+  linkedNodeId: string | null;
+  correctCount: number;
+  incorrectCount: number;
+}
 
-export const getLearningFiles = async (): Promise<LearningFile[]> => [];
-export const createLearningFile = async (_fileData: Partial<LearningFile>): Promise<LearningFile> => unavailable('إضافة ملف تعلم');
-export const updateLearningFile = async (_fileId: string, _updates: Partial<LearningFile>): Promise<void> => unavailable('تعديل ملف تعلم');
-export const moveLearningFile = async (_fileId: string, _targetNodeId: string): Promise<void> => unavailable('نقل ملف تعلم');
-export const archiveLearningFile = async (_fileId: string): Promise<void> => unavailable('أرشفة ملف تعلم');
-export const linkFileToKnowledgeNode = async (_fileId: string, _nodeId: string): Promise<void> => unavailable('ربط ملف بخريطة المعرفة');
+async function learningCall<T>(payload: Record<string, unknown>): Promise<T> {
+  try {
+    const response = await callNirbas<T>('learning', payload);
+    return response.data as T;
+  } catch (error) {
+    void reportClientError('learning-ui', error, payload);
+    throw error;
+  }
+}
+
+async function questionCall<T>(payload: Record<string, unknown>): Promise<T> {
+  try {
+    const response = await callNirbas<T>('questionBank', payload);
+    return response.data as T;
+  } catch (error) {
+    void reportClientError('question-bank-ui', error, payload);
+    throw error;
+  }
+}
+
+export const getLearningGraph = () => learningCall<LearningGraph>({ action: 'getGraph' });
+export const createKnowledgeNode = (label: string, parentId: string | null = null) =>
+  learningCall<LearningNode>({ action: 'createNode', label, parentId, type: 'lesson' });
+export const updateKnowledgeNode = (id: string, updates: Partial<LearningNode>) =>
+  learningCall<LearningNode>({ action: 'updateNode', id, updates });
+export const archiveKnowledgeNode = (id: string) =>
+  learningCall<LearningNode>({ action: 'archiveNode', id });
+export const createLearningFile = (title: string, url?: string, linkedNodeId?: string | null) =>
+  learningCall<LearningFile>({ action: 'createFile', title, url: url || null, linkedNodeId: linkedNodeId || null });
+export const updateLearningProfile = (updates: Partial<LearningProfile>) =>
+  learningCall<LearningProfile>({ action: 'updateProfile', updates });
+
+export const listQuestions = () => questionCall<Question[]>({ action: 'list' });
+export const createQuestion = (question: Partial<Question> & { title: string }) =>
+  questionCall<Question>({ action: 'create', ...question });
+export const updateQuestion = (id: string, updates: Partial<Question>) =>
+  questionCall<Question>({ action: 'update', id, updates });
+export const deleteQuestion = (id: string) => questionCall<Question>({ action: 'delete', id });
+export const answerQuestion = (id: string, answer: unknown) =>
+  questionCall<{ correct: boolean; correctAnswer: unknown; explanation: string }>({ action: 'answer', id, answer });
