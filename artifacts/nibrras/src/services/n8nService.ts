@@ -1,59 +1,40 @@
 import { mockWorkflows, mockAgents, mockLogs } from '../data/mockData';
 import { Workflow, WorkflowAgent, LogEntry } from '../types';
+import { callNirbas } from './backendClient';
 
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+export const listWorkflows = async (): Promise<Workflow[]> => [...mockWorkflows];
 
-export const listWorkflows = async (): Promise<Workflow[]> => {
-  await delay(400);
-  return [...mockWorkflows];
-};
-
-export const getWorkflowAgents = async (workflowId: string): Promise<WorkflowAgent[]> => {
-  await delay(300);
-  return mockAgents.filter(a => a.workflowId === workflowId);
-};
+export const getWorkflowAgents = async (workflowId: string): Promise<WorkflowAgent[]> =>
+  mockAgents.filter(a => a.workflowId === workflowId);
 
 export const runWorkflowMock = async (workflowId: string): Promise<void> => {
-  await delay(600);
-  console.log(`Mock: Workflow ${workflowId} executed.`);
+  await callNirbas('nirbas-workflow-runner', { workflowId, input: {} });
 };
 
 export const installWorkflowMock = async (workflowId: string): Promise<void> => {
-  await delay(300);
-  console.log(`Mock: Workflow ${workflowId} installed/pinned.`);
+  await callNirbas('nirbas-control-center', { action: 'install-workflow', workflowId });
 };
 
 export const hideWorkflowMock = async (workflowId: string): Promise<void> => {
-  await delay(300);
-  console.log(`Mock: Workflow ${workflowId} hidden.`);
+  await callNirbas('nirbas-control-center', { action: 'hide-workflow', workflowId });
 };
 
-export const getWorkflowLogsMock = async (workflowId: string): Promise<LogEntry[]> => {
-  await delay(400);
-  return mockLogs.filter(l => l.source === workflowId);
-};
+export const getWorkflowLogsMock = async (workflowId: string): Promise<LogEntry[]> =>
+  mockLogs.filter(l => l.source === workflowId);
 
-export const getAgentDetails = async (agentId: string): Promise<WorkflowAgent | undefined> => {
-  await delay(200);
-  return mockAgents.find(a => a.id === agentId);
-};
+export const getAgentDetails = async (agentId: string): Promise<WorkflowAgent | undefined> =>
+  mockAgents.find(a => a.id === agentId);
 
 export const updateAgentPromptMock = async (agentId: string, prompt: string): Promise<void> => {
-  await delay(500);
-  console.log(`Mock: Agent ${agentId} prompt updated to: ${prompt}`);
+  await callNirbas('nirbas-control-center', { action: 'update-agent-prompt', agentId, prompt });
 };
 
 export const updateAgentModelMock = async (agentId: string, model: string): Promise<void> => {
-  await delay(400);
-  console.log(`Mock: Agent ${agentId} model updated to: ${model}`);
+  await callNirbas('nirbas-control-center', { action: 'update-agent-model', agentId, model });
 };
 
 export const updateAgentToolsMock = async (agentId: string, tools: string[]): Promise<void> => {
-  await delay(400);
-  console.log(`Mock: Agent ${agentId} tools updated to:`, tools);
+  await callNirbas('nirbas-control-center', { action: 'update-agent-tools', agentId, tools });
 };
 
-export const getGlobalLogsMock = async (): Promise<LogEntry[]> => {
-  await delay(500);
-  return [...mockLogs];
-};
+export const getGlobalLogsMock = async (): Promise<LogEntry[]> => [...mockLogs];
