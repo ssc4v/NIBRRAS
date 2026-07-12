@@ -1,20 +1,23 @@
 import { mockSearchResults } from '../data/mockData';
 import { SearchResult } from '../types';
+import { callNirbas } from './backendClient';
 
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+export const runDeepSearchMock = async (
+  query: string,
+  options: any,
+): Promise<{ results: SearchResult[]; answer: string; citations: string[] }> => {
+  const response = await callNirbas<{ message?: string; status?: string }>('nirbas-deep-search', {
+    query,
+    options,
+  });
 
-export const runDeepSearchMock = async (query: string, options: any): Promise<{ results: SearchResult[], answer: string, citations: string[] }> => {
-  await delay(1200);
-  console.log(`Mock: Deep search executed for query "${query}" with options`, options);
-  
   return {
     results: [...mockSearchResults],
-    answer: 'بناءً على المصادر المتوفرة، يمكن تقسيم الموضوع إلى عدة محاور رئيسية. الأول يركز على الأساسيات، بينما الثاني يتعمق في التطبيقات العملية والنظرية المتقدمة.',
-    citations: ['sr1', 'sr3']
+    answer: response.message || `تم إرسال البحث العميق عن: ${query}`,
+    citations: [],
   };
 };
 
 export const saveToMemoryMock = async (searchId: string): Promise<void> => {
-  await delay(400);
-  console.log(`Mock: Search ${searchId} saved to memory.`);
+  await callNirbas('nirbas-learning', { action: 'save-search', searchId });
 };
