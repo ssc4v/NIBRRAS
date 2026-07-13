@@ -1,6 +1,8 @@
-const DEFAULT_NIRBAS_GATEWAY_URL = 'https://sc4v.app.n8n.cloud/webhook/nirbas-api';
-const REQUEST_TIMEOUT_MS = 45_000;
-const RETRYABLE_STATUS_CODES = new Set([408, 429, 500, 502, 503, 504]);
+import { runtimeConfig } from '../config/runtime';
+import { AppError, toAppError } from '../lib/app-error';
+
+const RETRYABLE_STATUS_CODES = new Set([408, 425, 429, 500, 502, 503, 504]);
+const BLOCKED_SERVICE_STATUSES = new Set(['not_implemented', 'queued', 'mock', 'disabled']);
 
 export type NirbasStatus = 'success' | 'error' | 'not_implemented' | 'queued' | 'disabled';
 
@@ -23,7 +25,7 @@ interface GatewayResponse<T = unknown> {
   data?: NirbasResponse<T>;
   executionId?: string;
   subExecutionId?: string;
-  error?: { message?: string } | string | null;
+  error?: { code?: string; message?: string } | string | null;
 }
 
 export type NirbasService =
@@ -35,50 +37,92 @@ export type NirbasService =
   | 'control'
   | 'audit';
 
-function getGatewayUrl(): string {
-  const configured = String(import.meta.env.VITE_NIRBAS_GATEWAY_URL ?? '').trim();
-  return configured || DEFAULT_NIRBAS_GATEWAY_URL;
+export interface NirbasRequestOptions {
+  signal?: AbortSignal;
+  retries?: number;
 }
 
-function errorMessage(
+function extractErrorMessage(
   payload: { error?: { message?: string } | string | null },
   fallback: string,
 ): string {
-  if (typeof payload.error === 'string') return payload.error;
-  if (payload.error?.message) return payload.error.message;
+  if (typeof payload.error === 'string' && payload.error.trim()) return payload.error.trim();
+  if (payload.error && typeof payload.error === 'object' && payload.error.message?.trim()) {
+    return payload.error.message.trim();
+  }
   return fallback;
 }
 
-function validateServiceResponse<T>(
-  service: NirbasService,
-  data: NirbasResponse<T>,
-): NirbasResponse<T> {
+function assertObject(value: unknown, message: string): asserts value is Record<string, unknown> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new AppError('INVALID_RESPONSE', message);
+  }
+}
+
+async function parseJsonResponse<T>(response: Response): Promise<GatewayResponse<T>> {
+  const raw = await response.text();
+  if (!raw.trim()) {
+    throw new AppError('INVALID_RESPONSE', `استجابة فارغة من بوابة نبراس: HTTP ${response.status}`);
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (cause) {
+    throw new AppError('INVALID_RESPONSE', `استجابة غير صالحة من بوابة نبراس: HTTP ${response.status}`, { cause });
+  }
+
+  assertObject(parsed, 'استجابة بوابة نبراس ليست كائنًا صالحًا');
+  return parsed as unknown as GatewayResponse<T>;
+}
+
+function validateServiceResponse<T>(service: NirbasService, data: NirbasResponse<T>): NirbasResponse<T> {
   if (data.ok !== true) {
-    throw new Error(errorMessage(data, `فشل تنفيذ ${service}`));
+    throw new AppError('BACKEND_UNAVAILABLE', extractErrorMessage(data, `فشل تنفيذ خدمة ${service}`));
   }
 
-  if (['not_implemented', 'queued', 'mock', 'disabled'].includes(String(data.status))) {
-    throw new Error(errorMessage(data, `الخدمة ${service} غير جاهزة`));
+  if (BLOCKED_SERVICE_STATUSES.has(String(data.status))) {
+    throw new AppError('BACKEND_UNAVAILABLE', extractErrorMessage(data, `الخدمة ${service} غير جاهزة`));
   }
 
-  if (!data.executionId) {
-    throw new Error(`لم يرجع ${service} معرّف تنفيذ حقيقي`);
+  if (!data.executionId?.trim()) {
+    throw new AppError('INVALID_RESPONSE', `خدمة ${service} لم ترجع معرّف تنفيذ حقيقي`);
   }
 
   return data;
 }
 
-async function parseGatewayResponse<T>(response: Response): Promise<GatewayResponse<T>> {
-  const raw = await response.text();
-  if (!raw.trim()) {
-    throw new Error(`استجابة فارغة من بوابة نبراس: HTTP ${response.status}`);
-  }
+function combineAbortSignals(externalSignal?: AbortSignal): {
+  signal: AbortSignal;
+  cleanup: () => void;
+} {
+  const controller = new AbortController();
+  const timeoutId = globalThis.setTimeout(() => controller.abort(), runtimeConfig.requestTimeoutMs);
+  const abortFromCaller = () => controller.abort();
 
-  try {
-    return JSON.parse(raw) as GatewayResponse<T>;
-  } catch {
-    throw new Error(`استجابة غير صالحة من بوابة نبراس: HTTP ${response.status}`);
-  }
+  if (externalSignal?.aborted) controller.abort();
+  else externalSignal?.addEventListener('abort', abortFromCaller, { once: true });
+
+  return {
+    signal: controller.signal,
+    cleanup: () => {
+      globalThis.clearTimeout(timeoutId);
+      externalSignal?.removeEventListener('abort', abortFromCaller);
+    },
+  };
+}
+
+function delay(ms: number, signal?: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const id = globalThis.setTimeout(resolve, ms);
+    const onAbort = () => {
+      globalThis.clearTimeout(id);
+      reject(new DOMException('Aborted', 'AbortError'));
+    };
+
+    if (signal?.aborted) onAbort();
+    else signal?.addEventListener('abort', onAbort, { once: true });
+  });
 }
 
 async function requestGateway<T>(
@@ -86,82 +130,85 @@ async function requestGateway<T>(
   payload: Record<string, unknown>,
   signal?: AbortSignal,
 ): Promise<{ response: Response; gateway: GatewayResponse<T> }> {
-  const controller = new AbortController();
-  const timeout = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-  const abortFromCaller = () => controller.abort();
-  signal?.addEventListener('abort', abortFromCaller, { once: true });
+  const combined = combineAbortSignals(signal);
 
   try {
-    const response = await fetch(getGatewayUrl(), {
+    const response = await fetch(runtimeConfig.gatewayUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
       body: JSON.stringify({ service, payload }),
-      signal: controller.signal,
+      signal: combined.signal,
       cache: 'no-store',
+      credentials: 'omit',
     });
 
-    const gateway = await parseGatewayResponse<T>(response);
-    return { response, gateway };
+    return { response, gateway: await parseJsonResponse<T>(response) };
   } finally {
-    window.clearTimeout(timeout);
-    signal?.removeEventListener('abort', abortFromCaller);
+    combined.cleanup();
   }
 }
 
 export async function callNirbas<T = unknown>(
   service: NirbasService,
   payload: Record<string, unknown>,
-  signal?: AbortSignal,
+  options: NirbasRequestOptions = {},
 ): Promise<NirbasResponse<T>> {
-  let lastError: unknown;
+  const retries = Math.max(0, Math.min(options.retries ?? 1, 3));
+  let lastError: AppError | undefined;
 
-  for (let attempt = 0; attempt < 2; attempt += 1) {
+  for (let attempt = 0; attempt <= retries; attempt += 1) {
     try {
-      const { response, gateway } = await requestGateway<T>(service, payload, signal);
+      const { response, gateway } = await requestGateway<T>(service, payload, options.signal);
 
       if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error('بوابة نبراس غير منشورة أو أن رابطها غير صحيح. تحقق من NIRBAS API Gateway في n8n.');
-        }
+        const message = response.status === 404
+          ? 'بوابة نبراس غير منشورة أو أن رابطها غير صحيح'
+          : extractErrorMessage(gateway, `فشل الاتصال: HTTP ${response.status}`);
 
-        const message = errorMessage(gateway, `فشل الاتصال: HTTP ${response.status}`);
-        const retryable = RETRYABLE_STATUS_CODES.has(response.status);
-        if (retryable && attempt === 0) {
-          await new Promise(resolve => window.setTimeout(resolve, 700));
+        const error = new AppError('BACKEND_UNAVAILABLE', message, {
+          retryable: RETRYABLE_STATUS_CODES.has(response.status),
+        });
+
+        if (error.retryable && attempt < retries) {
+          await delay(500 * 2 ** attempt, options.signal);
           continue;
         }
-        throw new Error(message);
+        throw error;
       }
 
       if (gateway.ok !== true) {
-        throw new Error(errorMessage(gateway, 'فشلت بوابة نبراس في توجيه الطلب'));
+        throw new AppError(
+          'BACKEND_UNAVAILABLE',
+          extractErrorMessage(gateway, 'فشلت بوابة نبراس في توجيه الطلب'),
+        );
       }
 
-      if (!gateway.executionId || !gateway.subExecutionId) {
-        throw new Error('لم ترجع بوابة نبراس معرّفات التنفيذ المطلوبة');
+      if (!gateway.executionId?.trim() || !gateway.subExecutionId?.trim()) {
+        throw new AppError('INVALID_RESPONSE', 'بوابة نبراس لم ترجع معرّفات التنفيذ المطلوبة');
       }
 
       if (!gateway.data) {
-        throw new Error('بوابة نبراس لم ترجع نتيجة الخدمة');
+        throw new AppError('INVALID_RESPONSE', 'بوابة نبراس لم ترجع نتيجة الخدمة');
       }
 
       return validateServiceResponse(service, gateway.data);
     } catch (error) {
-      lastError = error;
-      if (signal?.aborted) throw error;
-      if (attempt === 0 && error instanceof TypeError) {
-        await new Promise(resolve => window.setTimeout(resolve, 700));
+      const appError = toAppError(error);
+      lastError = appError;
+
+      if (options.signal?.aborted) throw appError;
+      if (appError.retryable && attempt < retries) {
+        await delay(500 * 2 ** attempt, options.signal);
         continue;
       }
       break;
     }
   }
 
-  if (lastError instanceof DOMException && lastError.name === 'AbortError') {
-    throw new Error('انتهت مهلة الاتصال بخدمات نبراس');
-  }
-  if (lastError instanceof Error) throw lastError;
-  throw new Error('تعذر الاتصال بخدمات نبراس');
+  throw lastError ?? new AppError('UNKNOWN', 'تعذر الاتصال بخدمات نبراس');
 }
 
 export async function reportClientError(
@@ -169,15 +216,20 @@ export async function reportClientError(
   error: unknown,
   details?: unknown,
 ): Promise<void> {
+  const appError = toAppError(error);
   try {
     await callNirbas('audit', {
       action: 'log',
       level: 'error',
       service,
-      message: error instanceof Error ? error.message : String(error),
+      code: appError.code,
+      message: appError.message,
+      retryable: appError.retryable,
       details,
-    });
+      appVersion: runtimeConfig.appVersion,
+      environment: runtimeConfig.environment,
+    }, { retries: 0 });
   } catch {
-    // Do not hide the original application error if audit logging is unavailable.
+    // Audit failure must never replace the original application error.
   }
 }
