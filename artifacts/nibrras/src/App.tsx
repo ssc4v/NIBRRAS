@@ -1,16 +1,18 @@
+import { lazy, Suspense } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Route, Switch, Router as WouterRouter } from 'wouter';
 import { Toaster } from 'sonner';
 
 import AppErrorBoundary from './components/AppErrorBoundary';
 import Layout from './components/layout/Layout';
-import ChatPage from './pages/chat';
-import VoiceCallPage from './pages/voice-call';
-import LearningPage from './pages/learning';
-import SearchPage from './pages/search';
-import ControlPage from './pages/control';
-import ProjectStorePage from './pages/project-store';
-import SystemPage from './pages/system';
+
+const ChatPage = lazy(() => import('./pages/chat'));
+const VoiceCallPage = lazy(() => import('./pages/voice-call'));
+const LearningPage = lazy(() => import('./pages/learning'));
+const SearchPage = lazy(() => import('./pages/search'));
+const ControlPage = lazy(() => import('./pages/control'));
+const ProjectStorePage = lazy(() => import('./pages/project-store'));
+const SystemPage = lazy(() => import('./pages/system'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -20,14 +22,24 @@ const queryClient = new QueryClient({
         if (/401|403|404|غير منشورة|غير صحيح/.test(message)) return false;
         return failureCount < 2;
       },
+      retryDelay: (attempt) => Math.min(1_000 * 2 ** attempt, 8_000),
       staleTime: 20_000,
       gcTime: 5 * 60_000,
       refetchOnWindowFocus: false,
       refetchOnReconnect: true,
+      networkMode: 'online',
     },
-    mutations: { retry: 0 },
+    mutations: { retry: 0, networkMode: 'online' },
   },
 });
+
+function PageLoader() {
+  return (
+    <div dir="rtl" role="status" aria-live="polite" className="flex h-full min-h-64 items-center justify-center p-6 text-sm text-muted-foreground">
+      جاري تحميل الصفحة…
+    </div>
+  );
+}
 
 function NotFound() {
   return (
@@ -42,16 +54,18 @@ function NotFound() {
 function Routes() {
   return (
     <Layout>
-      <Switch>
-        <Route path="/" component={ChatPage} />
-        <Route path="/call" component={VoiceCallPage} />
-        <Route path="/learning" component={LearningPage} />
-        <Route path="/search" component={SearchPage} />
-        <Route path="/control" component={ControlPage} />
-        <Route path="/projects" component={ProjectStorePage} />
-        <Route path="/system" component={SystemPage} />
-        <Route component={NotFound} />
-      </Switch>
+      <Suspense fallback={<PageLoader />}>
+        <Switch>
+          <Route path="/" component={ChatPage} />
+          <Route path="/call" component={VoiceCallPage} />
+          <Route path="/learning" component={LearningPage} />
+          <Route path="/search" component={SearchPage} />
+          <Route path="/control" component={ControlPage} />
+          <Route path="/projects" component={ProjectStorePage} />
+          <Route path="/system" component={SystemPage} />
+          <Route component={NotFound} />
+        </Switch>
+      </Suspense>
     </Layout>
   );
 }
