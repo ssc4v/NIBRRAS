@@ -1,4 +1,4 @@
-name: NIRBAS App CI
+name: NIBRRAS App CI
 
 on:
   push:
@@ -20,7 +20,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: nirbas-app-${{ github.ref }}
+  group: nibrras-app-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -45,16 +45,16 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Typecheck NIRBAS
+      - name: Typecheck NIBRRAS
         run: pnpm --dir artifacts/nibrras typecheck
 
-      - name: Build NIRBAS
+      - name: Build NIBRRAS
         run: pnpm --dir artifacts/nibrras build
 
       - name: Upload production bundle
         uses: actions/upload-artifact@v4
         with:
-          name: nirbas-dist
+          name: nibrras-dist
           path: artifacts/nibrras/dist
           if-no-files-found: error
           retention-days: 7
