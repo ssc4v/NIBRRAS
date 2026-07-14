@@ -13,7 +13,9 @@ if (Number.isNaN(port) || port <= 0) throw new Error(`Invalid PORT value: "${raw
 const basePath = process.env.BASE_PATH;
 if (!basePath) throw new Error('BASE_PATH environment variable is required but was not provided.');
 
-const gatewayUrl = process.env.NIRBAS_GATEWAY_URL ?? 'https://sc4v.app.n8n.cloud/webhook/nirbas-api';
+const gatewayUrl = new URL(
+  process.env.NIRBAS_GATEWAY_URL ?? 'https://sc4v.app.n8n.cloud/webhook/nirbas-api',
+);
 const authHeader = process.env.NIRBAS_AUTH_HEADER ?? 'Authorization';
 const authValue = process.env.NIRBAS_AUTH_VALUE;
 
@@ -52,10 +54,10 @@ export default defineConfig({
     fs: { strict: true },
     proxy: {
       '/api/nirbas': {
-        target: gatewayUrl,
+        target: gatewayUrl.origin,
         changeOrigin: true,
         secure: true,
-        rewrite: () => new URL(gatewayUrl).pathname,
+        rewrite: () => gatewayUrl.pathname,
         configure(proxy) {
           proxy.on('proxyReq', (proxyReq) => {
             proxyReq.setHeader('accept', 'application/json');
