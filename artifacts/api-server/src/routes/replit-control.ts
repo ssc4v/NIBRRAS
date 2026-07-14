@@ -4,13 +4,29 @@ import { promisify } from "node:util";
 
 const router: IRouter = Router();
 const execFileAsync = promisify(execFile);
-const allowedActions = new Set(["health", "diagnostics", "typecheck", "build"]);
+const allowedActions = new Set([
+  "health",
+  "diagnostics",
+  "typecheck",
+  "build",
+  "git-status",
+  "git-pull",
+]);
 let runningAction: string | null = null;
 
 function authorized(req: Parameters<Parameters<typeof router.post>[1]>[0]): boolean {
   const expected = process.env.REPLIT_CONTROL_TOKEN;
   const provided = req.header("x-replit-control-token");
   return Boolean(expected && provided && provided === expected);
+}
+
+async function run(command: string, args: string[], timeout = 120_000) {
+  return execFileAsync(command, args, {
+    cwd: process.cwd(),
+    timeout,
+    maxBuffer: 512_000,
+    env: process.env,
+  });
 }
 
 router.post("/replit-control", async (req, res) => {
@@ -20,8 +36,13 @@ router.post("/replit-control", async (req, res) => {
   }
 
   const action = String(req.body?.action ?? "").trim();
+  const approved = req.body?.approved === true;
   if (!allowedActions.has(action)) {
     res.status(400).json({ ok: false, error: { code: "ACTION_NOT_ALLOWED", message: "الأمر غير مسموح" } });
+    return;
+  }
+  if (action === "git-pull" && !approved) {
+    res.status(403).json({ ok: false, error: { code: "APPROVAL_REQUIRED", message: "git-pull يتطلب approved=true" } });
     return;
   }
 
@@ -31,6 +52,7 @@ router.post("/replit-control", async (req, res) => {
     nodeVersion: process.version,
     environment: process.env.NODE_ENV ?? "unknown",
     memory: process.memoryUsage(),
+    cwd: process.cwd(),
     timestamp: new Date().toISOString(),
   };
 
@@ -62,14 +84,21 @@ router.post("/replit-control", async (req, res) => {
 
   runningAction = action;
   try {
-    const script = action === "typecheck" ? "typecheck" : "build";
-    const result = await execFileAsync("pnpm", ["run", script], {
-      cwd: process.cwd(),
-      timeout: 120_000,
-      maxBuffer: 512_000,
-      env: process.env,
+    let result;
+    if (action === "typecheck") result = await run("pnpm", ["run", "typecheck"]);
+    else if (action === "build") result = await run("pnpm", ["run", "build"]);
+    else if (action === "git-status") result = await run("git", ["status", "--short", "--branch"], 30_000);
+    else result = await run("git", ["pull", "--ff-only"], 60_000);
+
+    res.json({
+      ok: true,
+      action,
+      data: {
+        stdout: result.stdout.slice(-12000),
+        stderr: result.stderr.slice(-12000),
+        ...base,
+      },
     });
-    res.json({ ok: true, action, data: { stdout: result.stdout.slice(-12000), stderr: result.stderr.slice(-12000), ...base } });
   } catch (error) {
     const details = error as { message?: string; stdout?: string; stderr?: string; code?: number | string };
     res.status(500).json({
