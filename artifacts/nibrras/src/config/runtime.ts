@@ -1,4 +1,4 @@
-const DEFAULT_GATEWAY_URL = 'https://sc4v.app.n8n.cloud/webhook/nirbas-api';
+const DEFAULT_GATEWAY_URL = '/api/nirbas';
 const DEFAULT_REQUEST_TIMEOUT_MS = 45_000;
 const MIN_REQUEST_TIMEOUT_MS = 5_000;
 const MAX_REQUEST_TIMEOUT_MS = 120_000;
@@ -8,14 +8,16 @@ function readEnv(name: string): string | undefined {
   return typeof value === 'string' && value.trim().length > 0 ? value.trim() : undefined;
 }
 
-function readUrl(name: string, fallback: string): string {
-  const candidate = readEnv(name) ?? fallback;
+function readGatewayUrl(): string {
+  const candidate = readEnv('VITE_NIRBAS_GATEWAY_URL') ?? DEFAULT_GATEWAY_URL;
+  if (candidate.startsWith('/')) return candidate;
+
   try {
     const url = new URL(candidate);
-    if (url.protocol !== 'https:' && import.meta.env.PROD) return fallback;
+    if (url.protocol !== 'https:' && import.meta.env.PROD) return DEFAULT_GATEWAY_URL;
     return url.toString().replace(/\/$/, '');
   } catch {
-    return fallback;
+    return DEFAULT_GATEWAY_URL;
   }
 }
 
@@ -26,7 +28,7 @@ function readBoundedInteger(name: string, fallback: number, min: number, max: nu
 }
 
 export const runtimeConfig = Object.freeze({
-  gatewayUrl: readUrl('VITE_NIRBAS_GATEWAY_URL', DEFAULT_GATEWAY_URL),
+  gatewayUrl: readGatewayUrl(),
   requestTimeoutMs: readBoundedInteger(
     'VITE_NIRBAS_REQUEST_TIMEOUT_MS',
     DEFAULT_REQUEST_TIMEOUT_MS,
