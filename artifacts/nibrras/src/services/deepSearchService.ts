@@ -1,4 +1,4 @@
-import { callNirbas, reportClientError } from './backendClient';
+import { callNibrras, reportClientError } from './backendClient';
 
 export interface DeepSearchResult {
   query: string;
@@ -8,7 +8,7 @@ export interface DeepSearchResult {
 
 export async function deepSearch(query: string): Promise<DeepSearchResult> {
   try {
-    const response = await callNirbas<string>('deepSearch', { query });
+    const response = await callNibrras<string>('deepSearch', { query });
     const result = String(response.result ?? response.output ?? '').trim();
     if (!result) throw new Error('لم يرجع البحث العميق نتيجة فعلية');
     return {

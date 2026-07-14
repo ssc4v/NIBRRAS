@@ -1,4 +1,4 @@
-import { callNirbas, reportClientError } from './backendClient';
+import { callNibrras, reportClientError } from './backendClient';
 
 export interface LearningNode {
   id: string;
@@ -49,7 +49,7 @@ export interface Question {
 
 async function learningCall<T>(payload: Record<string, unknown>): Promise<T> {
   try {
-    const response = await callNirbas<T>('learning', payload);
+    const response = await callNibrras<T>('learning', payload);
     return response.data as T;
   } catch (error) {
     void reportClientError('learning-ui', error, payload);
@@ -59,7 +59,7 @@ async function learningCall<T>(payload: Record<string, unknown>): Promise<T> {
 
 async function questionCall<T>(payload: Record<string, unknown>): Promise<T> {
   try {
-    const response = await callNirbas<T>('questionBank', payload);
+    const response = await callNibrras<T>('questionBank', payload);
     return response.data as T;
   } catch (error) {
     void reportClientError('question-bank-ui', error, payload);

@@ -5,7 +5,7 @@ import {
   getAuditEvents,
   getModels,
   getSystems,
-  runNirbasService,
+  runNibrrasService,
   type AuditEvent,
   type ModelOption,
   type SystemStatus,
@@ -61,7 +61,7 @@ export default function ControlPage() {
         throw new Error('اختبار هذه الخدمة يحتاج مدخلًا صريحًا من صفحتها المتخصصة.');
       }
 
-      await runNirbasService(system.id === 'errorAudit' ? 'audit' : system.id, input);
+      await runNibrrasService(system.id === 'errorAudit' ? 'audit' : system.id, input);
       setNotice(`نجح الاختبار الفعلي لخدمة ${system.name}.`);
       await load();
     } catch (err) {

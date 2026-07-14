@@ -84,7 +84,7 @@ export default function ChatPage() {
       <main className="flex-1 space-y-4 overflow-y-auto p-4">
         {messages.length === 0 && (
           <div className="rounded-2xl border border-border bg-card p-4 text-sm text-muted-foreground">
-            اكتب رسالتك. سيتم إرسالها إلى {MODEL_LABELS[model]} عبر NIRBAS Chat في n8n.
+            اكتب رسالتك. سيتم إرسالها إلى {MODEL_LABELS[model]} عبر NIBRRAS Chat في n8n.
           </div>
         )}
 

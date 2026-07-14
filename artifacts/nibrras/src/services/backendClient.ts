@@ -4,11 +4,11 @@ import { AppError, toAppError } from '../lib/app-error';
 const RETRYABLE_STATUS_CODES = new Set([408, 425, 429, 500, 502, 503, 504]);
 const BLOCKED_SERVICE_STATUSES = new Set(['not_implemented', 'queued', 'mock', 'disabled']);
 
-export type NirbasStatus = 'success' | 'error' | 'not_implemented' | 'queued' | 'disabled';
+export type NibrrasStatus = 'success' | 'error' | 'not_implemented' | 'queued' | 'disabled';
 
-export interface NirbasResponse<T = unknown> {
+export interface NibrrasResponse<T = unknown> {
   ok: boolean;
-  status?: NirbasStatus | string;
+  status?: NibrrasStatus | string;
   service?: string;
   data?: T;
   result?: T;
@@ -22,13 +22,13 @@ interface GatewayResponse<T = unknown> {
   ok: boolean;
   status?: string;
   targetService?: string;
-  data?: NirbasResponse<T>;
+  data?: NibrrasResponse<T>;
   executionId?: string;
   subExecutionId?: string;
   error?: { code?: string; message?: string } | string | null;
 }
 
-export type NirbasService =
+export type NibrrasService =
   | 'chat'
   | 'deepSearch'
   | 'learning'
@@ -37,7 +37,7 @@ export type NirbasService =
   | 'control'
   | 'audit';
 
-export interface NirbasRequestOptions {
+export interface NibrrasRequestOptions {
   signal?: AbortSignal;
   retries?: number;
 }
@@ -76,7 +76,7 @@ async function parseJsonResponse<T>(response: Response): Promise<GatewayResponse
   return parsed as unknown as GatewayResponse<T>;
 }
 
-function validateServiceResponse<T>(service: NirbasService, data: NirbasResponse<T>): NirbasResponse<T> {
+function validateServiceResponse<T>(service: NibrrasService, data: NibrrasResponse<T>): NibrrasResponse<T> {
   if (data.ok !== true) {
     throw new AppError('BACKEND_UNAVAILABLE', extractErrorMessage(data, `فشل تنفيذ خدمة ${service}`));
   }
@@ -126,7 +126,7 @@ function delay(ms: number, signal?: AbortSignal): Promise<void> {
 }
 
 async function requestGateway<T>(
-  service: NirbasService,
+  service: NibrrasService,
   payload: Record<string, unknown>,
   signal?: AbortSignal,
 ): Promise<{ response: Response; gateway: GatewayResponse<T> }> {
@@ -151,11 +151,11 @@ async function requestGateway<T>(
   }
 }
 
-export async function callNirbas<T = unknown>(
-  service: NirbasService,
+export async function callNibrras<T = unknown>(
+  service: NibrrasService,
   payload: Record<string, unknown>,
-  options: NirbasRequestOptions = {},
-): Promise<NirbasResponse<T>> {
+  options: NibrrasRequestOptions = {},
+): Promise<NibrrasResponse<T>> {
   const retries = Math.max(0, Math.min(options.retries ?? 1, 3));
   let lastError: AppError | undefined;
 
@@ -218,7 +218,7 @@ export async function reportClientError(
 ): Promise<void> {
   const appError = toAppError(error);
   try {
-    await callNirbas('audit', {
+    await callNibrras('audit', {
       action: 'log',
       level: 'error',
       service,

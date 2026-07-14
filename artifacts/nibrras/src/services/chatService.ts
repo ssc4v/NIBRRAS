@@ -1,11 +1,11 @@
 import type { Message } from '../types';
-import { callNirbas, reportClientError } from './backendClient';
+import { callNibrras, reportClientError } from './backendClient';
 
 export type ChatModel = 'openai' | 'gemini' | 'deepseek';
 
-const SESSION_KEY = 'nirbas-chat-session';
-const USER_KEY = 'nirbas-user-id';
-const MODEL_KEY = 'nirbas-chat-model';
+const SESSION_KEY = 'nibrras-chat-session';
+const USER_KEY = 'nibrras-user-id';
+const MODEL_KEY = 'nibrras-chat-model';
 const MAX_MESSAGE_LENGTH = 12_000;
 
 function createId(prefix: string): string {
@@ -57,12 +57,12 @@ export async function sendMessage(content: string, model: ChatModel = getSavedMo
   if (!navigator.onLine) throw new Error('لا يوجد اتصال بالإنترنت');
 
   try {
-    const response = await callNirbas('chat', {
+    const response = await callNibrras('chat', {
       message,
       model,
       sessionId: getChatSessionId(),
       userId: getAnonymousUserId(),
-      client: 'nirbas-web',
+      client: 'nibrras-web',
       locale: 'ar-SA',
     });
 

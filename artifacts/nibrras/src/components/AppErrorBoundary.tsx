@@ -20,7 +20,7 @@ export default class AppErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: unknown, info: ErrorInfo) {
-    console.error('NIRBAS_UI_CRASH', { error, componentStack: info.componentStack });
+    console.error('NIBRRAS_UI_CRASH', { error, componentStack: info.componentStack });
   }
 
   private recover = () => {

@@ -68,8 +68,8 @@ router.post("/replit-control", async (req, res) => {
       data: {
         ...base,
         configuration: {
-          nirbasGatewayConfigured: Boolean(process.env.NIRBAS_GATEWAY_URL),
-          nirbasAuthConfigured: Boolean(process.env.NIRBAS_AUTH_VALUE),
+          nibrrasGatewayConfigured: Boolean(process.env.NIBRRAS_GATEWAY_URL),
+          nibrrasAuthConfigured: Boolean(process.env.NIBRRAS_AUTH_VALUE),
           controlTokenConfigured: Boolean(process.env.REPLIT_CONTROL_TOKEN),
         },
       },

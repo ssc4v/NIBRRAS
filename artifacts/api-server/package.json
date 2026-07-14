@@ -1,5 +1,5 @@
 {
-  "name": "@workspace/api-server",
+  "name": "@nibrras/api-server",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -10,8 +10,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@workspace/api-zod": "workspace:*",
-    "@workspace/db": "workspace:*",
+    "@nibrras/api-zod": "workspace:*",
+    "@nibrras/db": "workspace:*",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "drizzle-orm": "catalog:",

@@ -1,4 +1,4 @@
-import { callNirbas, reportClientError } from './backendClient';
+import { callNibrras, reportClientError } from './backendClient';
 
 export interface SystemStatus {
   id: string;
@@ -26,28 +26,28 @@ export interface AuditEvent {
 }
 
 export async function getSystems(): Promise<{ systems: SystemStatus[]; checkedAt: string; note: string }> {
-  const response = await callNirbas<{ systems: SystemStatus[]; checkedAt: string; note: string }>('control', { action: 'systems' });
+  const response = await callNibrras<{ systems: SystemStatus[]; checkedAt: string; note: string }>('control', { action: 'systems' });
   return response.data as { systems: SystemStatus[]; checkedAt: string; note: string };
 }
 
 export async function getModels(): Promise<{ available: ModelOption[]; defaultModel: string }> {
-  const response = await callNirbas<{ available: ModelOption[]; defaultModel: string }>('control', { action: 'models' });
+  const response = await callNibrras<{ available: ModelOption[]; defaultModel: string }>('control', { action: 'models' });
   return response.data as { available: ModelOption[]; defaultModel: string };
 }
 
 export async function updateSettings(updates: Record<string, unknown>): Promise<Record<string, unknown>> {
-  const response = await callNirbas<Record<string, unknown>>('control', { action: 'updateSettings', updates });
+  const response = await callNibrras<Record<string, unknown>>('control', { action: 'updateSettings', updates });
   return response.data as Record<string, unknown>;
 }
 
 export async function getAuditEvents(limit = 30): Promise<AuditEvent[]> {
-  const response = await callNirbas<AuditEvent[]>('audit', { action: 'list', limit });
+  const response = await callNibrras<AuditEvent[]>('audit', { action: 'list', limit });
   return response.data as AuditEvent[];
 }
 
-export async function runNirbasService(service: string, input: Record<string, unknown>): Promise<unknown> {
+export async function runNibrrasService(service: string, input: Record<string, unknown>): Promise<unknown> {
   try {
-    const response = await callNirbas('workflowRunner', { service, input });
+    const response = await callNibrras('workflowRunner', { service, input });
     return response.data;
   } catch (error) {
     void reportClientError('workflow-runner-ui', error, { service, input });

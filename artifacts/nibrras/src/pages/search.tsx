@@ -32,7 +32,7 @@ export default function SearchPage() {
       <header className="mb-4 flex items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold">البحث العميق</h1>
-          <p className="text-sm text-muted-foreground">بحث فعلي عبر NIRBAS Deep Search في n8n</p>
+          <p className="text-sm text-muted-foreground">بحث فعلي عبر NIBRRAS Deep Search في n8n</p>
         </div>
         <Button variant="outline" size="sm" onClick={() => setLocation('/')}>
           <ArrowRight className="ml-1 h-4 w-4" /> المحادثة

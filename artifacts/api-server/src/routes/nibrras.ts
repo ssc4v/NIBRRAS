@@ -1,18 +1,18 @@
 import { Router, type IRouter } from "express";
 
 const router: IRouter = Router();
-const DEFAULT_GATEWAY_URL = "https://sc4v.app.n8n.cloud/webhook/nirbas-api";
+const DEFAULT_GATEWAY_URL = "https://sc4v.app.n8n.cloud/webhook/nibrras-api";
 
-router.post("/nirbas", async (req, res, next) => {
+router.post("/nibrras", async (req, res, next) => {
   try {
-    const gatewayUrl = process.env.NIRBAS_GATEWAY_URL ?? DEFAULT_GATEWAY_URL;
-    const authHeader = process.env.NIRBAS_AUTH_HEADER ?? "Authorization";
-    const authValue = process.env.NIRBAS_AUTH_VALUE;
+    const gatewayUrl = process.env.NIBRRAS_GATEWAY_URL ?? DEFAULT_GATEWAY_URL;
+    const authHeader = process.env.NIBRRAS_AUTH_HEADER ?? "Authorization";
+    const authValue = process.env.NIBRRAS_AUTH_VALUE;
 
     if (!authValue) {
       res.status(503).json({
         ok: false,
-        error: { code: "NIRBAS_AUTH_MISSING", message: "لم يتم إعداد اعتماد بوابة نبراس في الخادم" },
+        error: { code: "NIBRRAS_AUTH_MISSING", message: "لم يتم إعداد اعتماد بوابة نبراس في الخادم" },
         requestId: req.id,
       });
       return;

@@ -15,16 +15,16 @@ async function post(path: string, body: Record<string, unknown>) {
 }
 
 export const inspectGithubProject = (url: string) =>
-  post('/webhook/nirbas-project-importer', { url });
+  post('/webhook/nibrras-project-importer', { url });
 
 export const scanGithubProject = (url: string) =>
-  post('/webhook/nirbas-security-scanner', { url });
+  post('/webhook/nibrras-security-scanner', { url });
 
 export const sandboxGithubProject = (url: string) =>
-  post('/webhook/nirbas-sandbox-tester', { url });
+  post('/webhook/nibrras-sandbox-tester', { url });
 
 export const listSkills = () =>
-  post('/webhook/nirbas-skill-registry', { action: 'list' });
+  post('/webhook/nibrras-skill-registry', { action: 'list' });
 
 export const registerSkill = (payload: Record<string, unknown>) =>
-  post('/webhook/nirbas-skill-registry', { action: 'create', ...payload });
+  post('/webhook/nibrras-skill-registry', { action: 'create', ...payload });

@@ -1,4 +1,4 @@
-const DEFAULT_GATEWAY_URL = '/api/nirbas';
+const DEFAULT_GATEWAY_URL = '/api/nibrras';
 const DEFAULT_REQUEST_TIMEOUT_MS = 45_000;
 const MIN_REQUEST_TIMEOUT_MS = 5_000;
 const MAX_REQUEST_TIMEOUT_MS = 120_000;
@@ -9,7 +9,7 @@ function readEnv(name: string): string | undefined {
 }
 
 function readGatewayUrl(): string {
-  const candidate = readEnv('VITE_NIRBAS_GATEWAY_URL') ?? DEFAULT_GATEWAY_URL;
+  const candidate = readEnv('VITE_NIBRRAS_GATEWAY_URL') ?? DEFAULT_GATEWAY_URL;
   if (candidate.startsWith('/')) return candidate;
 
   try {
@@ -30,7 +30,7 @@ function readBoundedInteger(name: string, fallback: number, min: number, max: nu
 export const runtimeConfig = Object.freeze({
   gatewayUrl: readGatewayUrl(),
   requestTimeoutMs: readBoundedInteger(
-    'VITE_NIRBAS_REQUEST_TIMEOUT_MS',
+    'VITE_NIBRRAS_REQUEST_TIMEOUT_MS',
     DEFAULT_REQUEST_TIMEOUT_MS,
     MIN_REQUEST_TIMEOUT_MS,
     MAX_REQUEST_TIMEOUT_MS,
