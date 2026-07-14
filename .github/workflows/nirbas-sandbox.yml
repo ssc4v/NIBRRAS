@@ -1,4 +1,4 @@
-name: NIRBAS Sandbox
+name: NIBRRAS Sandbox
 
 on:
   workflow_dispatch:
@@ -87,7 +87,7 @@ jobs:
           fi
           if [ -f CMakeLists.txt ]; then
             checks="$checks,cmake"
-            cmake -S . -B /tmp/nirbas-build -DCMAKE_BUILD_TYPE=Release >/tmp/cmake.log 2>&1 || status=warning
+            cmake -S . -B /tmp/nibrras-build -DCMAKE_BUILD_TYPE=Release >/tmp/cmake.log 2>&1 || status=warning
           fi
           echo "$status" > ../validation-status.txt
           echo "$checks" > ../checks.txt
@@ -107,7 +107,7 @@ jobs:
           report={
             'ok': status in ('passed','warning'),
             'status': status,
-            'service': 'NIRBAS Sandbox Tester',
+            'service': 'NIBRRAS Sandbox Tester',
             'sourceUrl': os.environ.get('SOURCE_URL'),
             'checks': [x for x in read('checks.txt','inventory').split(',') if x],
             'repositorySize': read('size.txt','unknown'),
