@@ -1,0 +1,141 @@
+name: NIBRRAS Sandbox
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_url:
+        description: Public GitHub repository URL
+        required: true
+        type: string
+      resumeUrl:
+        description: n8n resume callback URL injected by dispatchAndWait
+        required: true
+        type: string
+      requested_ref:
+        description: Branch, tag, or commit
+        required: false
+        default: ''
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  sandbox:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      SOURCE_URL: ${{ inputs.source_url }}
+      REQUESTED_REF: ${{ inputs.requested_ref }}
+    steps:
+      - name: Validate source
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "$SOURCE_URL" in
+            https://github.com/*/*) ;;
+            *) echo "Only public GitHub HTTPS URLs are allowed"; exit 2 ;;
+          esac
+
+      - name: Clone into disposable runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -n "$REQUESTED_REF" ]; then
+            git clone --depth 1 --branch "$REQUESTED_REF" "$SOURCE_URL" source
+          else
+            git clone --depth 1 "$SOURCE_URL" source
+          fi
+          rm -rf source/.git
+
+      - name: Inventory and policy checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd source
+          find . -maxdepth 3 -type f | sed 's#^./##' | sort | head -2000 > ../files.txt
+          du -sh . | awk '{print $1}' > ../size.txt
+          find . -type f \( -name '.env' -o -name '*.pem' -o -name '*.p12' -o -name 'id_rsa' \) -print > ../sensitive-files.txt
+          grep -RIlE '(BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY|AKIA[0-9A-Z]{16})' . --exclude-dir=node_modules --exclude-dir=.venv 2>/dev/null | head -100 > ../secret-pattern-files.txt || true
+
+      - name: Ecosystem-safe validation
+        shell: bash
+        run: |
+          set -uo pipefail
+          cd source
+          status=passed
+          checks="inventory"
+          if [ -f package.json ]; then
+            checks="$checks,node"
+            node --version
+            npm --version
+            npm install --package-lock-only --ignore-scripts --no-audit --no-fund >/tmp/npm.log 2>&1 || status=warning
+          fi
+          if [ -f pyproject.toml ] || [ -f requirements.txt ]; then
+            checks="$checks,python"
+            python --version
+            python -m compileall -q . >/tmp/python.log 2>&1 || status=warning
+          fi
+          if [ -f Cargo.toml ]; then
+            checks="$checks,rust"
+            cargo metadata --no-deps --format-version 1 >/tmp/cargo.json 2>/tmp/cargo.log || status=warning
+          fi
+          if [ -f go.mod ]; then
+            checks="$checks,go"
+            go version
+            go list ./... >/tmp/go.log 2>&1 || status=warning
+          fi
+          if [ -f CMakeLists.txt ]; then
+            checks="$checks,cmake"
+            cmake -S . -B /tmp/nibrras-build -DCMAKE_BUILD_TYPE=Release >/tmp/cmake.log 2>&1 || status=warning
+          fi
+          echo "$status" > ../validation-status.txt
+          echo "$checks" > ../checks.txt
+
+      - name: Build JSON report
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, pathlib
+          def read(path, default=''):
+              p=pathlib.Path(path)
+              return p.read_text(errors='replace').strip() if p.exists() else default
+          sensitive=[x for x in read('sensitive-files.txt').splitlines() if x]
+          patterns=[x for x in read('secret-pattern-files.txt').splitlines() if x]
+          status=read('validation-status.txt','failed')
+          report={
+            'ok': status in ('passed','warning'),
+            'status': status,
+            'service': 'NIBRRAS Sandbox Tester',
+            'sourceUrl': os.environ.get('SOURCE_URL'),
+            'checks': [x for x in read('checks.txt','inventory').split(',') if x],
+            'repositorySize': read('size.txt','unknown'),
+            'sensitiveFiles': sensitive[:100],
+            'secretPatternFiles': patterns[:100],
+            'policy': {
+              'disposableRunner': True,
+              'repositorySecretsExposed': False,
+              'permissions': 'contents:read',
+              'timeoutMinutes': 12,
+              'installScriptsDisabledForNode': True
+            },
+            'limitations': [
+              'The runner has outbound network access.',
+              'This is not a proof that the project is safe.',
+              'Arbitrary project tests and application code are not executed automatically.'
+            ]
+          }
+          pathlib.Path('report.json').write_text(json.dumps(report, ensure_ascii=False))
+          PY
+
+      - name: Return report to n8n
+        if: always()
+        shell: bash
+        env:
+          CALLBACK_URL: ${{ inputs.resumeUrl }}
+        run: |
+          curl --fail-with-body --retry 3 --max-time 30 \
+            -H 'Content-Type: application/json' \
+            --data-binary @report.json \
+            "$CALLBACK_URL"
