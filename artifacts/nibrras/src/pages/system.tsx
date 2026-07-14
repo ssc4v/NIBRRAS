@@ -35,8 +35,8 @@ export default function SystemPage() {
     } catch (error: any) { toast.error(error?.message || 'تعذر تشغيل الكاميرا'); }
   }
 
-  async function enableNotifications() {
-    if (!('Notification' in window)) return toast.error('الإشعارات غير مدعومة');
+  async function enableNotifications(): Promise<void> {
+    if (!('Notification' in window)) { toast.error('الإشعارات غير مدعومة'); return; }
     const permission = await Notification.requestPermission();
     if (permission === 'granted') {
       new Notification('نبراس', { body: 'تم تفعيل إشعارات الجهاز المحلية.' });
@@ -56,8 +56,8 @@ export default function SystemPage() {
     } catch (error: any) { toast.error(error?.message || 'فشل إنشاء الخطة'); }
   }
 
-  async function decide(kind: 'approve'|'reject'|'rollback') {
-    if (!actionId) return toast.error('لا يوجد Action ID');
+  async function decide(kind: 'approve'|'reject'|'rollback'): Promise<void> {
+    if (!actionId) { toast.error('لا يوجد Action ID'); return; }
     try {
       const data = kind === 'approve' ? await approveAction(actionId) : kind === 'reject' ? await rejectAction(actionId) : await rollbackAction(actionId);
       setReport(data); toast.success('تم تحديث حالة الإجراء فعليًا');
