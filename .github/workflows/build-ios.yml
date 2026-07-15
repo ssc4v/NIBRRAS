@@ -1,0 +1,41 @@
+name: Build iOS App (unsigned)
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: macos-14
+    defaults:
+      run:
+        working-directory: ios-app
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Add iOS platform
+        run: npx cap add ios
+
+      - name: Sync Capacitor
+        run: npx cap sync ios
+      - name: Build unsigned app
+        working-directory: ios-app/ios/App
+        run: xcodebuild -workspace App.xcworkspace -scheme App -configuration Release -sdk iphoneos -derivedDataPath build CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+
+      - name: Package IPA
+        working-directory: ios-app/ios/App
+        run: mkdir -p Payload && cp -r build/Build/Products/Release-iphoneos/App.app Payload/ && zip -r NIBRRAS.ipa Payload
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: NIBRRAS-ipa
+          path: ios-app/ios/App/NIBRRAS.ipa
