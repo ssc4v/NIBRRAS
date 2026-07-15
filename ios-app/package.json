@@ -9,6 +9,7 @@
           "@capacitor/camera": "^6.0.2"
     },
     "devDependencies": {
-          "@capacitor/cli": "^6.1.2"
+          "@capacitor/cli": "^6.1.2",
+        "typescript": "^5.5.0"
     }
 }
