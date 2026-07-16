@@ -35,7 +35,7 @@ const queryClient = new QueryClient({
 
 function PageLoader() {
   return (
-    <div dir="rtl" role="status" aria-live="polite" className="flex h-full min-h-64 items-center justify-center p-6 text-sm text-muted-foreground">
+    <div data-nibrras-theme="dark" dir="rtl" role="status" aria-live="polite" className="flex h-full min-h-64 items-center justify-center p-6 text-sm text-muted-foreground">
       جاري تحميل الصفحة…
     </div>
   );
