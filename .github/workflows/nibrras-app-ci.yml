@@ -45,6 +45,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build shared libraries
+        run: pnpm run typecheck:libs
+
       - name: Typecheck NIBRRAS
         run: pnpm --dir artifacts/nibrras typecheck
 
