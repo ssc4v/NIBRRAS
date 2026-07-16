@@ -1,4 +1,4 @@
-modules = ["nodejs-24"]
+modules = ["nodejs-24", "postgresql-16"]
 
 [deployment]
 router = "application"
@@ -26,3 +26,6 @@ localPort = 22127
 
 [userenv.shared]
 NIRBAS_AUTH_HEADER = "X-N8N-API-KEY"
+
+[nix]
+channel = "stable-25_05"

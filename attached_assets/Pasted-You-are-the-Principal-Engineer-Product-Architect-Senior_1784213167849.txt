@@ -1,0 +1,1296 @@
+You are the Principal Engineer, Product Architect, Senior UI/UX Designer, Backend Engineer, n8n Automation Engineer, Security Engineer, and QA Lead responsible for upgrading the existing application “Nirbas / نيرباس”.
+
+Nirbas is a personal AI operating system inspired by JARVIS. It must allow the user to communicate with AI, manage tools and automations, create AI employees, and control their n8n workflows directly from an iPhone.
+
+This is an existing application. Do not start a separate demo project. Work inside the current repository and preserve all valuable working functionality.
+
+Your job is not only to redesign screens. Your job is to inspect, repair, complete, integrate, test, and strengthen the complete frontend and backend until the most important user journeys work end-to-end.
+
+Main objective
+
+Transform Nirbas into a modern, reliable, secure, mobile-first AI operating system with:
+
+* A premium iPhone-first interface.
+* A real backend, not mocked frontend screens.
+* Real connection with n8n.
+* AI employee creation and management.
+* Workflow creation and editing.
+* Versioning, testing, approval, publishing, and rollback.
+* Real execution logs and status reporting.
+* Shared and private memory architecture.
+* Clear security and permission controls.
+* Accurate success and failure notifications.
+* Arabic RTL and English support.
+* Strong performance, maintainability, and testing.
+
+Critical execution rules
+
+1. Inspect the existing project before changing architecture.
+2. Do not remove working functionality without a clear reason.
+3. Do not rebuild the project from scratch unless the existing architecture is unusable and the reason is documented.
+4. Do not create visual-only features.
+5. Do not use mocked API responses for production features.
+6. Do not show success unless the backend and n8n confirm success.
+7. Do not expose API keys, tokens, credentials, webhook secrets, or private configuration to the browser.
+8. Store secrets only in Replit Secrets or secure server-side environment variables.
+9. Do not directly modify an active production workflow without creating a backup and draft.
+10. Do not delete user data or workflows without explicit confirmation.
+11. Use the current project’s technology stack when technically suitable.
+12. Prefer focused improvements over unnecessary dependency changes.
+13. Create a checkpoint before major changes.
+14. After implementation, run real tests and fix discovered problems.
+15. Do not stop after writing a plan. Execute the approved plan and complete the implementation.
+16. If a feature cannot be completed because a credential or external permission is missing, complete all code possible and show exactly which secret or permission is required.
+17. Never hard-code the n8n API key.
+18. The frontend must never be the source of truth for workflow status.
+19. Every important operation must return a confirmed server response.
+20. Preserve a rollback path for every major change.
+
+Phase 1 — Full project audit
+
+Before modifying the project, inspect:
+
+* Repository structure.
+* Frontend framework.
+* Backend framework.
+* Package manager.
+* Database and schemas.
+* Authentication.
+* Authorization.
+* API routes.
+* State management.
+* Environment variables.
+* n8n integration.
+* Webhooks.
+* External APIs.
+* AI model integrations.
+* File upload system.
+* Voice or camera integrations.
+* Logging.
+* Error handling.
+* Testing configuration.
+* Build and deployment configuration.
+* PWA configuration.
+* Existing mobile behavior.
+* Arabic RTL support.
+* Security configuration.
+
+Run the existing application and inspect:
+
+* Build errors.
+* TypeScript errors.
+* Runtime exceptions.
+* Browser console errors.
+* Failed network requests.
+* Server errors.
+* Broken imports.
+* Invalid environment variables.
+* Dependency conflicts.
+* Slow pages.
+* Unresponsive buttons.
+* Placeholder pages.
+* Fake success messages.
+* Missing loading states.
+* Missing empty states.
+* Missing error states.
+* Broken navigation.
+* Authentication failures.
+* Incorrect API responses.
+* Broken n8n webhooks.
+* Layout overflow on iPhone.
+* Keyboard and safe-area problems.
+* Accessibility problems.
+
+Create an internal prioritized list:
+
+* Critical: security, crashes, data loss, broken production operations.
+* High: failed integrations, incorrect actions, authentication, workflow editing.
+* Medium: architecture, performance, UX.
+* Low: cosmetic improvements.
+
+Then fix the problems. Do not only display the audit.
+
+Phase 2 — Stabilize architecture
+
+Improve the existing architecture while preserving compatible code.
+
+Separate the code into clear layers:
+
+* UI components.
+* Pages and navigation.
+* Client state.
+* API client.
+* Server routes.
+* Business logic.
+* n8n integration service.
+* Authentication and permissions.
+* Database access.
+* Validation.
+* Logging and auditing.
+* Error normalization.
+* Configuration.
+* Shared types.
+
+Requirements:
+
+* Use strict typing where TypeScript is available.
+* Add validation for all user input and external responses.
+* Use shared request and response types.
+* Centralize API endpoints.
+* Centralize n8n configuration.
+* Centralize timeout and retry rules.
+* Remove duplicate code.
+* Remove dead code.
+* Remove unused packages.
+* Replace fragile shortcuts.
+* Add clear error boundaries.
+* Add request timeouts.
+* Add safe retries only for idempotent operations.
+* Add unique request identifiers for important operations.
+* Add consistent error responses.
+* Update project documentation.
+* Create or update .env.example without secret values.
+* Ensure secrets never appear in client bundles or logs.
+
+Phase 3 — Modern Nirbas visual identity
+
+Redesign Nirbas as a premium personal AI operating system.
+
+The design should feel:
+
+* Modern.
+* Intelligent.
+* Calm.
+* Professional.
+* Fast.
+* Focused.
+* Powerful without visual clutter.
+* Suitable for daily use on an iPhone.
+
+Use a professional dark interface.
+
+Create a reusable design system with:
+
+* Color tokens.
+* Surface tokens.
+* Typography scale.
+* Spacing scale.
+* Border radius.
+* Shadows and elevation.
+* Borders.
+* Icon sizes.
+* Input sizes.
+* Button sizes.
+* Status colors.
+* Animation durations.
+* Loading states.
+* Empty states.
+* Error states.
+* Success states.
+
+Avoid:
+
+* Excessive gradients.
+* Excessive glassmorphism.
+* Random colors.
+* Tiny text.
+* Tiny touch targets.
+* Desktop-only layouts.
+* Generic dashboard templates.
+* Inconsistent cards.
+* Unnecessary animations.
+* Horizontal scrolling.
+* Fake charts.
+* Decorative elements that reduce usability.
+
+iPhone-first requirements
+
+Optimize primarily for current iPhone screens and iOS Safari.
+
+Implement:
+
+* Proper safe-area support.
+* Responsive navigation.
+* Bottom navigation where suitable.
+* Touch targets of practical mobile size.
+* Bottom sheets for mobile editing.
+* Responsive forms.
+* Correct keyboard behavior.
+* No content hidden behind the keyboard.
+* No fixed elements covering content.
+* No horizontal overflow.
+* Fast loading on mobile networks.
+* Skeleton loading.
+* Pull-to-refresh where useful.
+* Swipe actions only when clear and safe.
+* Confirmation for destructive swipe actions.
+* Draft autosave.
+* Unsaved-change warnings.
+* Offline-safe display where practical.
+* PWA installation support when compatible.
+* Correct manifest and icons.
+* Correct viewport and theme configuration.
+
+For complex workflow editing, use two modes:
+
+1. Visual workflow canvas.
+2. Simplified ordered mobile step editor.
+
+The ordered step editor should be the default experience on small iPhone screens.
+
+Arabic and English
+
+Support:
+
+* Full Arabic RTL.
+* English LTR.
+* Dynamic direction changes.
+* Correct icon direction.
+* Correct form alignment.
+* Correct navigation behavior.
+* Correct number, date, and time formatting.
+* No mixed-direction layout bugs.
+* Translations stored centrally.
+* No hard-coded UI strings scattered across components.
+
+Arabic name: نيرباس
+English name: Nirbas
+
+Main application structure
+
+Create or improve these main areas:
+
+1. Home dashboard.
+2. AI chat.
+3. AI Employees.
+4. Workflows.
+5. Tasks.
+6. Approvals.
+7. Memory.
+8. Integrations.
+9. Activity and logs.
+10. System health.
+11. Settings.
+
+Home dashboard
+
+The home dashboard should show useful real data:
+
+* Nirbas status.
+* Active AI employees.
+* Running tasks.
+* Workflows with errors.
+* Pending approvals.
+* Recent executions.
+* API or integration health.
+* Recent important actions.
+* Estimated model usage.
+* Shortcuts to common actions.
+
+Do not use fake analytics.
+
+New core feature — AI Workforce Builder
+
+Create a new main section called:
+
+English: AI Employees
+Arabic: الموظفون الأذكياء
+
+Also use this feature title:
+
+English: AI Workforce Builder
+Arabic: مصنع الموظفين الأذكياء
+
+The purpose is to let the user build AI agents that operate like digital employees or departments.
+
+Each AI employee must be a real backend entity and may connect to one or more real n8n workflows.
+
+An AI employee must contain:
+
+* Unique identifier.
+* Name.
+* Avatar.
+* Job title.
+* Department.
+* Description.
+* Main objective.
+* Responsibilities.
+* Allowed actions.
+* Forbidden actions.
+* Supervisor.
+* Communication style.
+* Preferred language.
+* Status.
+* Operating mode.
+* Tools.
+* Integrations.
+* Permissions.
+* Memory configuration.
+* Knowledge sources.
+* Connected workflows.
+* Working schedule.
+* Approval policy.
+* Cost policy.
+* Performance metrics.
+* Last activity.
+* Current task.
+* Version.
+* Created date.
+* Updated date.
+
+Supported statuses:
+
+* Draft.
+* Testing.
+* Active.
+* Paused.
+* Failed.
+* Waiting for approval.
+* Archived.
+
+AI employee cards
+
+Display employees as professional cards.
+
+Each card must show:
+
+* Avatar.
+* Name.
+* Job title.
+* Department.
+* Status.
+* Current task.
+* Connected workflows.
+* Last execution.
+* Success rate.
+* Error count.
+* Pending approvals.
+* Estimated cost.
+
+Quick actions:
+
+* Open.
+* Run.
+* Pause.
+* Activate.
+* Edit.
+* Test.
+* Duplicate.
+* View workflows.
+* View logs.
+* Roll back.
+* Archive.
+* Delete.
+
+Do not mark actions successful until confirmed by the backend.
+
+AI employee creation wizard
+
+Build a mobile-friendly step-by-step wizard.
+
+Step 1 — Employee identity
+
+Fields:
+
+* Employee name.
+* Job title.
+* Department.
+* Description.
+* Avatar.
+* Language.
+* Communication style.
+* Supervisor.
+* Priority.
+
+Step 2 — Mission
+
+Fields:
+
+* Main objective.
+* Responsibilities.
+* Allowed tasks.
+* Forbidden tasks.
+* Expected outputs.
+* Success criteria.
+* Escalation conditions.
+* Failure conditions.
+
+Allow Nirbas to suggest improved wording, but the user must be able to edit all values.
+
+Step 3 — Operating mode
+
+Supported modes:
+
+* Manual.
+* Scheduled.
+* Event-driven.
+* Supervised.
+* Autonomous.
+
+Definitions:
+
+Manual:
+Runs only when the user starts it.
+
+Scheduled:
+Runs using a schedule.
+
+Event-driven:
+Runs from an email, webhook, message, database event, social event, file upload, or supported trigger.
+
+Supervised:
+Prepares work and waits for user approval.
+
+Autonomous:
+Executes only actions explicitly allowed by its permission policy.
+
+Sensitive or destructive actions must require approval by default.
+
+Step 4 — Tools and integrations
+
+Allow selecting configured tools:
+
+* n8n workflows.
+* Web search.
+* AI models.
+* Email.
+* Telegram.
+* WhatsApp when available.
+* Social media.
+* GitHub.
+* Notion.
+* Google Drive.
+* Calendar.
+* Database.
+* CRM.
+* File processing.
+* Internal APIs.
+* Custom webhooks.
+* Voice.
+* Camera and image input when supported.
+
+The browser must never receive integration credentials.
+
+Step 5 — Memory and knowledge
+
+Support:
+
+* Temporary task memory.
+* Conversation memory.
+* Long-term employee memory.
+* Shared company memory.
+* Private employee memory.
+* Department memory.
+* User-approved knowledge sources.
+* Documents.
+* Databases.
+* Notion pages.
+* Drive files.
+* Retention policies.
+* Memory deletion.
+* Sensitive-data restrictions.
+
+Clearly show which memory is shared and which is private.
+
+Step 6 — Permissions
+
+Create granular permission controls.
+
+Examples:
+
+* Read workflow.
+* Create workflow.
+* Edit workflow draft.
+* Publish workflow.
+* Pause workflow.
+* Delete workflow.
+* Read email.
+* Draft email.
+* Send email.
+* Read calendar.
+* Create calendar event.
+* Access files.
+* Publish social content.
+* Delete social content.
+* Reply to comments.
+* Use paid models.
+* Access shared memory.
+* Create another employee.
+* Modify another employee.
+* Access system settings.
+
+Use least privilege by default.
+
+High-risk permissions must be disabled by default.
+
+Step 7 — Workflows
+
+Allow the user to:
+
+* Create a workflow from the employee’s job description.
+* Select an existing n8n workflow.
+* Link multiple workflows.
+* Create a draft.
+* View workflow nodes.
+* Add nodes.
+* Remove nodes.
+* Edit node settings.
+* Reconnect nodes.
+* Configure triggers.
+* Configure conditions.
+* Configure schedules.
+* Configure retries.
+* Add error handling.
+* Add logging.
+* Add approval steps.
+* Add notification steps.
+* Add rollback logic.
+* Test workflow.
+* Publish workflow.
+
+All operations must use the backend and authorized n8n integration.
+
+Do not simulate workflow editing only in the interface.
+
+Step 8 — Review and test
+
+Before activation:
+
+* Validate the employee data.
+* Validate permissions.
+* Validate required credentials.
+* Validate workflow structure.
+* Validate webhook URLs.
+* Validate trigger configuration.
+* Check for exposed secrets.
+* Run a safe test.
+* Display real test input.
+* Display real test output.
+* Display execution errors.
+* Display required approvals.
+* Let the user activate only after successful validation or explicit override.
+
+n8n integration architecture
+
+Build a secure server-side n8n service.
+
+Configuration must use server-side environment variables such as:
+
+* N8N_BASE_URL
+* N8N_API_KEY
+* N8N_WEBHOOK_SECRET
+* N8N_PROJECT_ID when required
+
+Never expose these values to the frontend.
+
+Create a server-side integration layer responsible for:
+
+* Authentication with n8n.
+* Listing workflows.
+* Reading a workflow.
+* Creating a workflow.
+* Updating a workflow.
+* Activating a workflow.
+* Deactivating a workflow.
+* Deleting or archiving a workflow.
+* Reading executions.
+* Reading execution errors.
+* Validating workflow data.
+* Creating backups.
+* Restoring backups.
+* Testing webhooks.
+* Handling API timeouts.
+* Normalizing n8n errors.
+* Auditing changes.
+
+Do not allow the frontend to communicate directly with the n8n API using a secret key.
+
+Required backend operations
+
+Implement secure backend endpoints or server actions for:
+
+AI employees
+
+* Create employee.
+* List employees.
+* Read employee.
+* Update employee.
+* Duplicate employee.
+* Activate employee.
+* Pause employee.
+* Archive employee.
+* Delete employee.
+* Test employee.
+* Run employee.
+* Read employee metrics.
+* Read employee logs.
+
+Workflows
+
+* List workflows.
+* Read workflow.
+* Create workflow draft.
+* Generate workflow draft.
+* Update workflow draft.
+* Add workflow node.
+* Edit workflow node.
+* Remove workflow node.
+* Reconnect workflow nodes.
+* Validate workflow.
+* Test workflow.
+* Publish workflow.
+* Activate workflow.
+* Deactivate workflow.
+* Clone workflow.
+* Archive workflow.
+* Delete workflow.
+* List workflow versions.
+* Compare workflow versions.
+* Restore workflow version.
+* Read workflow executions.
+
+Tasks
+
+* Create task.
+* Assign task.
+* Run task.
+* Pause task.
+* Cancel task.
+* Retry task.
+* Approve task.
+* Reject task.
+* Read task result.
+* Read task logs.
+
+Approvals
+
+* List pending approvals.
+* Read approval.
+* Approve action.
+* Reject action.
+* Expire action.
+* Add approval comment.
+
+Every operation must include:
+
+* Authentication.
+* Authorization.
+* Server-side validation.
+* Loading state.
+* Error handling.
+* Confirmed result.
+* Audit log.
+* Safe retry behavior where appropriate.
+
+Workflow draft and publishing lifecycle
+
+Never modify a production workflow directly without protection.
+
+Use this lifecycle:
+
+1. Load the latest workflow from n8n.
+2. Create a versioned backup.
+3. Create an editable draft.
+4. Apply changes to the draft.
+5. Validate nodes and connections.
+6. Validate credentials references.
+7. Validate triggers.
+8. Validate required parameters.
+9. Run a safe test.
+10. Display test results.
+11. Request approval when required.
+12. Publish the new version.
+13. Monitor initial executions.
+14. Offer or perform rollback if the new version fails.
+
+Every version must record:
+
+* Version number.
+* Workflow identifier.
+* Employee identifier.
+* Timestamp.
+* Change summary.
+* Actor.
+* Test result.
+* Publish status.
+* Previous version.
+* Rollback status.
+
+Visual workflow editor
+
+Create a workflow editor adapted for both desktop and iPhone.
+
+Desktop experience:
+
+* Visual canvas.
+* Zoom.
+* Pan.
+* Node selection.
+* Connection editing.
+* Node search.
+* Side inspector.
+* Execution data viewer.
+
+iPhone experience:
+
+* Ordered step list.
+* Searchable node picker.
+* Bottom-sheet node editor.
+* Simple branch editor.
+* Trigger editor.
+* Condition editor.
+* Retry editor.
+* Approval editor.
+* Move step up and down.
+* Enable or disable a step.
+* Duplicate step.
+* Delete step with confirmation.
+* Test selected step when supported.
+* Save as draft.
+* Show unsaved changes.
+
+The mobile editor must not depend on dragging tiny nodes.
+
+Company structure
+
+Allow AI employees to be organized as a company.
+
+Support:
+
+* Company owner.
+* Main manager.
+* Departments.
+* Department managers.
+* Employees.
+* Specialist employees.
+* Temporary employees.
+* Projects.
+* Teams.
+* Delegated tasks.
+* Task handoff.
+* Employee-to-employee communication.
+* Escalation to manager.
+* Escalation to the human user.
+
+Create an organization view showing:
+
+* Reporting lines.
+* Departments.
+* Current status.
+* Assigned work.
+* Workflow health.
+* Pending approvals.
+
+No employee, including the main manager, receives unlimited access automatically.
+
+Task management
+
+Create an employee task inbox.
+
+A task must contain:
+
+* Identifier.
+* Title.
+* Instructions.
+* Priority.
+* Status.
+* Deadline.
+* Assigned employee.
+* Supervisor.
+* Required approval.
+* Related workflow.
+* Input data.
+* Files.
+* Output.
+* Error.
+* Execution identifier.
+* Created date.
+* Updated date.
+
+Task statuses:
+
+* New.
+* Planning.
+* Waiting for approval.
+* Running.
+* Completed.
+* Failed.
+* Paused.
+* Cancelled.
+
+Social Media Manager template
+
+Create a ready-to-use employee template:
+
+English: Social Media Manager
+Arabic: مدير وسائل التواصل
+
+Capabilities:
+
+* Research content topics.
+* Study trends from approved sources.
+* Build a content calendar.
+* Generate content ideas.
+* Draft captions.
+* Prepare image or video generation requests.
+* Suggest hashtags.
+* Schedule posts.
+* Publish through configured integrations.
+* Monitor comments.
+* Draft replies.
+* Escalate sensitive comments.
+* Collect analytics.
+* Generate weekly reports.
+* Prevent duplicate posts.
+* Follow brand voice.
+* Request approval before publishing by default.
+
+Do not automatically publish until:
+
+* Platform credentials are configured.
+* Required permissions are available.
+* Approval policy allows publishing.
+* Content validation succeeds.
+
+Additional employee templates
+
+Create editable templates for:
+
+* Content Researcher.
+* Customer Support Agent.
+* Email Assistant.
+* Sales Assistant.
+* Marketing Analyst.
+* Personal Assistant.
+* Workflow Developer.
+* Quality Assurance Agent.
+* Reporting Agent.
+* Knowledge Manager.
+
+Templates must create real editable employee configurations, not static cards.
+
+Approvals center
+
+Create a central approvals page.
+
+Show:
+
+* Action.
+* Employee.
+* Workflow.
+* Risk level.
+* Reason for approval.
+* Proposed input.
+* Proposed output.
+* Estimated cost.
+* Requested time.
+* Expiration time.
+* Approve.
+* Reject.
+* Edit before approval.
+* Test before approval.
+
+High-risk actions include:
+
+* Deleting data.
+* Publishing content.
+* Sending external messages.
+* Editing production workflows.
+* Deleting workflows.
+* Changing credentials.
+* Using paid APIs.
+* Creating users.
+* Changing security settings.
+
+Memory center
+
+Create a memory management page.
+
+The user must be able to:
+
+* View shared company memory.
+* View employee-specific memory.
+* Search memory.
+* Add memory.
+* Edit memory.
+* Delete memory.
+* Approve suggested memory.
+* Define retention.
+* Define privacy.
+* See memory source.
+* See which employees can access it.
+
+Do not store secrets in memory.
+
+Integrations center
+
+Create a page showing all integrations with real status.
+
+For each integration show:
+
+* Name.
+* Connection status.
+* Last successful test.
+* Last error.
+* Permissions.
+* Employees using it.
+* Workflows using it.
+* Test connection button.
+* Configuration guidance.
+
+Never expose the credential value.
+
+System health page
+
+Create a real system-health page showing:
+
+* Application status.
+* Backend status.
+* Database status.
+* n8n API status.
+* n8n webhook status.
+* AI provider status.
+* Integration status.
+* Failed executions.
+* Slow executions.
+* Pending approvals.
+* Workflow errors.
+* Last successful checks.
+
+Use real checks. Do not show fabricated green statuses.
+
+Notifications
+
+Create accurate notifications for:
+
+* Employee created.
+* Employee updated.
+* Employee activated.
+* Employee paused.
+* Task completed.
+* Task failed.
+* Workflow test succeeded.
+* Workflow test failed.
+* Workflow published.
+* Workflow rollback completed.
+* Approval required.
+* Integration disconnected.
+
+Notifications must reflect the confirmed backend state.
+
+Never show “success” from a button click alone.
+
+Database model
+
+Use the existing database if suitable.
+
+Create safe migrations for entities such as:
+
+* Users.
+* AI employees.
+* Departments.
+* Teams.
+* Employee tools.
+* Employee permissions.
+* Employee memories.
+* Employee knowledge sources.
+* Employee workflows.
+* Workflow drafts.
+* Workflow versions.
+* Tasks.
+* Approvals.
+* Executions.
+* Integrations.
+* Performance metrics.
+* Audit logs.
+* Notifications.
+
+Requirements:
+
+* Use stable unique identifiers.
+* Use timestamps.
+* Use indexes for common queries.
+* Use foreign keys where appropriate.
+* Avoid storing credentials in normal database fields.
+* Use soft delete or archive where recovery is important.
+* Preserve existing data.
+* Provide rollback-safe migrations.
+
+Authentication and authorization
+
+Inspect and strengthen the existing authentication.
+
+Implement:
+
+* Protected backend routes.
+* Session validation.
+* User ownership checks.
+* Role and permission checks.
+* CSRF protection where relevant.
+* Secure cookies where relevant.
+* Rate limiting for sensitive operations.
+* Request validation.
+* Safe error messages.
+* No credential leakage.
+
+Because Nirbas is a personal system, keep the experience simple but do not remove essential security.
+
+Security requirements
+
+Protect against:
+
+* Exposed secrets.
+* Unauthorized workflow modification.
+* Injection attacks.
+* Invalid webhook requests.
+* Cross-site scripting.
+* Cross-site request forgery where applicable.
+* Server-side request forgery.
+* Path traversal.
+* Unsafe file upload.
+* Insecure direct object reference.
+* Excessive permissions.
+* Replay attacks on sensitive webhooks.
+* Sensitive data in logs.
+
+For webhook requests, use validation or a shared secret when supported.
+
+Sanitize user-controlled content before rendering.
+
+Validate uploaded file type and size.
+
+Error handling
+
+Create a consistent error system.
+
+Errors should include:
+
+* User-friendly Arabic or English message.
+* Internal error code.
+* Request identifier.
+* Retry option when safe.
+* Technical details only in protected logs.
+* Suggested corrective action.
+
+Examples:
+
+* n8n unavailable.
+* Invalid API key.
+* Workflow validation failed.
+* Credential missing.
+* Test execution timed out.
+* Permission denied.
+* Database unavailable.
+* External integration disconnected.
+
+Logging and audit trail
+
+Create an audit trail for important actions:
+
+* Actor.
+* Employee.
+* Workflow.
+* Action.
+* Previous state summary.
+* New state summary.
+* Approval.
+* Execution result.
+* Error code.
+* Timestamp.
+* Rollback information.
+
+Do not log:
+
+* API keys.
+* Access tokens.
+* Passwords.
+* Full sensitive files.
+* Unnecessary private conversation content.
+
+Performance
+
+Improve:
+
+* Initial page load.
+* Route loading.
+* Database queries.
+* Repeated API calls.
+* Large list rendering.
+* Workflow visualization.
+* Image loading.
+* Bundle size.
+* Cache behavior.
+* Mobile responsiveness.
+
+Use lazy loading where appropriate.
+
+Avoid excessive polling.
+
+Use controlled refresh intervals or event-based updates when possible.
+
+Testing requirements
+
+Add or improve testing.
+
+Required testing categories:
+
+* Unit tests.
+* Backend API tests.
+* Validation tests.
+* Permission tests.
+* n8n integration tests using safe test configuration.
+* UI component tests where practical.
+* End-to-end tests for critical journeys.
+* Mobile viewport tests.
+* Arabic RTL tests.
+* Error-state tests.
+* Security-focused tests.
+
+Test important iPhone viewport sizes.
+
+Test:
+
+* Slow network.
+* API timeout.
+* n8n unavailable.
+* Invalid secret.
+* Expired session.
+* Workflow validation error.
+* Failed workflow execution.
+* Duplicate submission.
+* Accidental double tap.
+* Browser refresh during editing.
+* Unsaved changes.
+* Missing integration credentials.
+
+Mandatory end-to-end acceptance test
+
+The feature is not complete until this journey works:
+
+1. User opens AI Employees.
+2. User creates a Social Media Manager.
+3. User sets its mission.
+4. User configures permissions.
+5. User selects supervised mode.
+6. User connects an existing n8n workflow or creates a new draft.
+7. User views workflow steps.
+8. User adds or edits a workflow step.
+9. User saves the draft.
+10. Backend creates a workflow backup.
+11. Backend validates the draft.
+12. Backend runs a safe test through n8n.
+13. Real execution result appears in Nirbas.
+14. Failed tests display failure and the actual error.
+15. Successful tests allow approval.
+16. User approves publishing.
+17. New workflow version is published to n8n.
+18. User can run the employee.
+19. Execution logs appear in Nirbas.
+20. User pauses the employee.
+21. User edits the workflow again.
+22. User compares versions.
+23. User restores the previous version.
+24. n8n confirms the restored state.
+25. Audit logs show the full operation.
+26. No secret appears in the browser, source maps, network response, or logs.
+
+Additional acceptance criteria
+
+The upgrade is complete only when:
+
+* The application builds without critical errors.
+* Important TypeScript errors are resolved.
+* Existing valuable functionality still works.
+* Every main button has a real action.
+* Fake or misleading success states are removed.
+* n8n operations are confirmed by the server.
+* The AI employee builder works with persisted data.
+* Workflows can be read and managed securely.
+* Draft, test, publish, pause, and rollback work.
+* Arabic RTL works.
+* iPhone layouts have no major overflow.
+* Loading, empty, error, and success states exist.
+* Secrets are server-side only.
+* Database migrations are safe.
+* Critical end-to-end tests pass.
+* The project contains updated setup documentation.
+
+Implementation sequence
+
+Follow this order:
+
+1. Inspect and run the existing project.
+2. Create a checkpoint.
+3. Produce an internal audit.
+4. Fix build and runtime blockers.
+5. Stabilize backend architecture.
+6. Secure configuration and secrets.
+7. Implement the n8n server integration.
+8. Implement database models and migrations.
+9. Build AI employee backend operations.
+10. Build workflow draft and versioning operations.
+11. Build the mobile-first AI Employees interface.
+12. Build the workflow mobile editor.
+13. Build tasks and approvals.
+14. Build memory, integrations, logs, and health pages.
+15. Modernize the rest of the Nirbas interface.
+16. Add Arabic RTL and English support.
+17. Add tests.
+18. Run end-to-end tests.
+19. Fix discovered defects.
+20. Run production build.
+21. Provide a final implementation report.
+
+Required final report
+
+At completion, provide:
+
+* What was discovered.
+* What was fixed.
+* What was redesigned.
+* What backend operations were added.
+* What n8n operations are working.
+* What database changes were made.
+* What tests were run.
+* Which tests passed.
+* Which tests failed.
+* Any remaining limitations.
+* Required Replit Secrets.
+* Required n8n permissions.
+* Exact instructions for testing on iPhone.
+* Exact rollback instructions.
+* List of changed files.
+
+Do not claim that a feature works unless it was actually tested.
+
+Missing-secret behavior
+
+If credentials are missing, do not stop the whole implementation.
+
+Instead:
+
+1. Build the complete secure integration code.
+2. Add the required environment variable names.
+3. Add clear configuration validation.
+4. Add a connection-test interface.
+5. Show the exact missing secret.
+6. Continue building all features that do not require the secret.
+7. Never insert fake credentials.
+
+Expected secret names may include:
+
+* N8N_BASE_URL
+* N8N_API_KEY
+* N8N_WEBHOOK_SECRET
+* DATABASE_URL
+* SESSION_SECRET
+
+Use the project’s existing naming when already established.
+
+Final instruction
+
+Act as an accountable senior engineering team.
+
+Do not produce only mockups, plans, placeholder screens, or static demonstrations.
+
+Inspect the existing Nirbas application, preserve what works, repair what is broken, implement the missing frontend and backend, connect all supported operations to real n8n functionality, test critical user journeys, fix discovered defects, and leave the project in a stable and maintainable state.
