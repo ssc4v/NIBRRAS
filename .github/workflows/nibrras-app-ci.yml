@@ -45,11 +45,17 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build shared libraries
+        run: pnpm run typecheck:libs
+
       - name: Typecheck NIBRRAS
         run: pnpm --dir artifacts/nibrras typecheck
 
       - name: Build NIBRRAS
         run: pnpm --dir artifacts/nibrras build
+        env:
+          PORT: 22127
+          BASE_PATH: /
 
       - name: Upload production bundle
         uses: actions/upload-artifact@v4

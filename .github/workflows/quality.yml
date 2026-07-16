@@ -24,6 +24,8 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
+        with:
+          version: 10
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -34,11 +36,17 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build shared libraries
+        run: pnpm run typecheck:libs
+
       - name: Frontend typecheck
         run: pnpm --dir artifacts/nibrras typecheck
 
       - name: Frontend build
         run: pnpm --dir artifacts/nibrras build
+        env:
+          PORT: 22127
+          BASE_PATH: /
 
       - name: Backend typecheck
         run: pnpm --dir artifacts/api-server typecheck
