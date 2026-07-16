@@ -1,0 +1,82 @@
+{
+  "generatedAt": "2026-07-16T07:29:46.018Z",
+  "files": [
+    {
+      "name": "App.tsx",
+      "path": "artifacts/nibrras/src/App.tsx",
+      "type": "file",
+      "sha": "4e0db998d72a9da372d4849ed24f08ac2daf0349",
+      "size": 3046
+    },
+    {
+      "name": "components",
+      "path": "artifacts/nibrras/src/components",
+      "type": "dir",
+      "sha": "219ccd3eb7401e2c393be2665c5e78d44aefbdee",
+      "size": 0
+    },
+    {
+      "name": "config",
+      "path": "artifacts/nibrras/src/config",
+      "type": "dir",
+      "sha": "94bf75069433f27f887b0d33e6d12bba07f1aab5",
+      "size": 0
+    },
+    {
+      "name": "data",
+      "path": "artifacts/nibrras/src/data",
+      "type": "dir",
+      "sha": "4f35e2712898d07163f21d74e527d209b5d40af7",
+      "size": 0
+    },
+    {
+      "name": "hooks",
+      "path": "artifacts/nibrras/src/hooks",
+      "type": "dir",
+      "sha": "46bebfc6e52561980ada28ae37ff6a51275bea20",
+      "size": 0
+    },
+    {
+      "name": "index.css",
+      "path": "artifacts/nibrras/src/index.css",
+      "type": "file",
+      "sha": "a71285936be5367b35718cde23758c74f862ff07",
+      "size": 6642
+    },
+    {
+      "name": "lib",
+      "path": "artifacts/nibrras/src/lib",
+      "type": "dir",
+      "sha": "6f1633b701905d6d4b2dd64cf1954ee945cd689e",
+      "size": 0
+    },
+    {
+      "name": "main.tsx",
+      "path": "artifacts/nibrras/src/main.tsx",
+      "type": "file",
+      "sha": "31117de8d59380f6e2b827f41f7f4fc7ab1dce60",
+      "size": 436
+    },
+    {
+      "name": "pages",
+      "path": "artifacts/nibrras/src/pages",
+      "type": "dir",
+      "sha": "9c99febb9830ea9c657703040dd158cbff070dc1",
+      "size": 0
+    },
+    {
+      "name": "services",
+      "path": "artifacts/nibrras/src/services",
+      "type": "dir",
+      "sha": "c6d342eb6a8ad65db301d8dc7adc52674549508e",
+      "size": 0
+    },
+    {
+      "name": "types",
+      "path": "artifacts/nibrras/src/types",
+      "type": "dir",
+      "sha": "10afd809246db9baaa7e79ce149c80d11272cf8d",
+      "size": 0
+    }
+  ]
+}
