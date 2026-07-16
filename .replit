@@ -21,3 +21,8 @@ timeoutMs = 20000
 
 [[ports]]
 localPort = 22127
+
+[userenv]
+
+[userenv.shared]
+NIRBAS_AUTH_HEADER = "X-N8N-API-KEY"
